@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambotics™</title>
+  <meta name="description" content="A new robotics company. Coming soon." />
+  <meta property="og:title" content="Ambotics™" />
+  <meta property="og:description" content="A new robotics company. Coming soon." />
+  <meta property="og:image" content="assets/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:description" content="A new robotics company. Coming soon." />
+  <link rel="icon" href="assets/og-image.png" />
+
+  <!-- Fonts: Gabarito (display), Inter (body), Instrument Sans (UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..700&family=Inter:wght@300..600&family=Instrument+Sans:wght@400..600&display=swap" rel="stylesheet" />
+  <!-- Satoshi (form UI) — same source the original loads -->
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind (Play CDN — keeps the build dependency-free) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            page: "#f6f6f6",
+            ink: "#333333",
+            muted: "#a8a8a8",
+            nav: "#808080",
+            field: "#ededed",
+          },
+          fontFamily: {
+            display: ['Gabarito', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+            ui: ['"Instrument Sans"', 'sans-serif'],
+            sat: ['Satoshi', 'sans-serif'],
+          },
+          maxWidth: { content: '600px' },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root { color-scheme: light; }
+    body { background: #f6f6f6; }
+
+    /* Gabarito stylistic set 1, matching the original display type */
+    .ss01 { font-feature-settings: "ss01" on; }
+
+    /* Body copy weighted at 450 like the source (Inter variable) */
+    .body-copy { font-variation-settings: "opsz" 14, "wght" 460; font-weight: 460; }
+
+    /* Carousel: horizontal scroll with snap, scrollbar hidden */
+    .carousel { scrollbar-width: none; -ms-overflow-style: none; scroll-snap-type: x mandatory; }
+    .carousel::-webkit-scrollbar { display: none; }
+    .carousel > * { scroll-snap-align: start; }
+
+    input::placeholder { color: #9a9a9a; }
+
+    /* Footer — mint-green glow from the left edge, fading through teal #163C43 to black */
+    .footer-grad {
+      background:
+        radial-gradient(72% 82% at -8% 52%,
+          #CDEEE1 0%, #A6DAC9 11%, #4d8a82 27%, #1f4d52 44%, rgba(22,60,67,0) 72%),
+        linear-gradient(180deg, #03070b 0%, rgba(3,7,11,0) 34%),
+        linear-gradient(100deg, #16404a 0%, #0e272d 42%, #04090c 74%, #000000 100%);
+    }
+    .footer-grad::before, .footer-grad::after {
+      content: ""; position: absolute; border-radius: 50%;
+      filter: blur(70px); pointer-events: none; z-index: 0;
+    }
+    .footer-grad::before {
+      width: 52%; aspect-ratio: 1; left: -22%; top: 14%;
+      background: radial-gradient(circle, rgba(205,238,225,0.40), transparent 64%);
+      animation: footerDrift1 19s ease-in-out infinite alternate;
+    }
+    .footer-grad::after {
+      width: 38%; aspect-ratio: 1; left: -4%; top: 34%;
+      background: radial-gradient(circle, rgba(150,214,196,0.26), transparent 64%);
+      animation: footerDrift2 23s ease-in-out infinite alternate;
+    }
+    /* Film-grain noise overlay */
+    .footer-noise {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      opacity: 0.3; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+    @keyframes footerDrift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(18%,25%) scale(1.2); } }
+    @keyframes footerDrift2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-15%,18%) scale(1.15); } }
+    @media (prefers-reduced-motion: reduce) {
+      .footer-grad::before, .footer-grad::after { animation: none; }
+    }
+  </style>
+</head>
+
+<body class="font-body text-ink antialiased selection:bg-black/10">
+
+  <!-- ===================== MAIN ===================== -->
+  <main id="top" class="min-h-screen w-full">
+    <div class="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-[84px] pt-16 sm:pt-20 lg:pt-[104px] pb-24">
+
+      <!-- Single grid: sticky left sidebar (logo + nav) + content -->
+      <div class="lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">
+
+        <!-- Sticky sidebar: logo (always visible) + nav (desktop only) -->
+        <aside class="lg:sticky lg:top-[40px] lg:self-start">
+          <a href="#top" class="font-display ss01 inline-block text-[27px] font-semibold tracking-[-0.02em] text-muted leading-none">
+            Ambotics<sup class="text-[0.42em] align-super tracking-normal">™</sup>
+          </a>
+
+          <nav id="nav" class="hidden lg:flex flex-col gap-[12px] mt-[120px] font-body text-[14px] tracking-[-0.02em] text-nav">
+            <a href="#starting" data-spy="starting" class="w-fit transition-colors duration-300 hover:text-ink">Starting point</a>
+            <a href="#applications" data-spy="applications" class="w-fit transition-colors duration-300 hover:text-ink">Applications</a>
+            <a href="#contact" data-spy="contact" class="w-fit transition-colors duration-300 hover:text-ink">Get in touch</a>
+          </nav>
+        </aside>
+
+        <!-- Content column -->
+        <div class="min-w-0 mt-14 lg:mt-0">
+
+          <!-- Heading -->
+          <h1 class="font-display ss01 max-w-[360px] text-[clamp(28px,5vw,32px)] font-medium leading-[1.05] tracking-[-0.02em] text-ink">
+            A new kind of robotics company.
+          </h1>
+
+          <div class="mt-14 lg:mt-20">
+
+          <!-- Starting point -->
+          <section id="starting" class="max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]">
+            <p>Robotics has spent most of its life as a demonstration. Impressive in a lab, filmed in slow motion, explained in a language only engineers could follow, and almost never present in the rooms where real work actually gets done.</p>
+            <p>Most companies in this field still build for the lab. They lead with the hardware and the breakthrough, and they speak to other engineers. We do the opposite. We lead with your business, in plain language, about your problem. If automating a task does not produce a real return for your operation, we will not take it on. That discipline is not a limitation. It is the whole promise.</p>
+            <p>We own the entire stack: software, hardware, data, training, and model evaluation, so we can iterate faster than anyone else. When we do take something on, we own all of it. The hardware, the installation, the daily operation, and the support that keeps everything running long after the first day. You will never have to become a robotics expert or assemble a line of vendors to make it work. You show us where the repetitive work lives. We carry the rest.</p>
+          </section>
+
+          <!-- Applications (carousel) -->
+          <section id="applications" class="mt-24 group/carousel relative">
+            <div id="carousel" class="carousel flex gap-[10px] overflow-x-auto -mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]">
+              <!-- card -->
+              <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+                <img src="assets/manufacturing.jpg" alt="Manufacturing" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+                <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">Manufacturing</figcaption>
+              </figure>
+
+              <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+                <img src="assets/hospitality.jpg" alt="Hospitality" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+                <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">Hospitality</figcaption>
+              </figure>
+
+              <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+                <img src="assets/logistics.jpg" alt="Logistics" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+                <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">Logistics</figcaption>
+              </figure>
+
+              <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+                <img src="assets/retail.jpg" alt="Retail" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+                <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">Retail</figcaption>
+              </figure>
+
+              <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+                <img src="assets/food-beverage.jpg" alt="Food &amp; Beverage" loading="lazy" class="absolute inset-0 h-full w-full object-cover" />
+                <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">Food &amp; Beverage</figcaption>
+              </figure>
+            </div>
+
+            <!-- arrows -->
+            <button type="button" data-dir="-1" aria-label="Previous"
+              class="absolute left-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100">
+              <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M22.5 12.5 15 20l7.5 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" data-dir="1" aria-label="Next"
+              class="absolute right-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100">
+              <svg width="20" height="20" viewBox="0 0 40 40" fill="none"><path d="M17.5 12.5 25 20l-7.5 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </section>
+
+          <!-- Lead-in copy -->
+          <section class="mt-24 max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]">
+            <p>Most of our customers start in the same place. They have a sense that something in their operation could be done better, and they are not sure what is possible or where to begin.</p>
+            <p>Tell us where the repetitive work lives. We will tell you plainly whether there is a case for automating it. If there is, we will build it, run it, and stand behind it.</p>
+          </section>
+
+          <!-- Get in touch -->
+          <section id="contact" class="mt-16 max-w-content">
+            <form class="flex items-center rounded-full bg-field p-[6px] pl-5" onsubmit="return false;">
+              <input type="email" inputmode="email" placeholder="name@email.com"
+                class="min-w-0 flex-1 bg-transparent font-sat text-[15px] tracking-[-0.01em] text-ink outline-none" />
+              <button type="submit"
+                class="shrink-0 rounded-full bg-white px-5 py-[10px] font-sat text-[14px] font-medium tracking-[-0.01em] text-[#1a1a1a] shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-transform active:scale-[0.98]">
+                Notify me
+              </button>
+            </form>
+          </section>
+
+          </div><!-- /sections wrapper -->
+        </div><!-- /content column -->
+      </div><!-- /grid -->
+    </div>
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer class="px-[10px] pb-[10px]">
+    <div class="footer-grad relative flex min-h-[60vh] items-center overflow-hidden rounded-[24px]">
+      <div class="footer-noise" aria-hidden="true"></div>
+      <div class="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-6 py-24 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-[74px]">
+        <span class="font-display ss01 text-[28px] font-semibold leading-none tracking-[-0.02em] text-[#0b262b]">
+          Ambotics<sup class="text-[0.42em] align-super tracking-normal">™</sup>
+        </span>
+        <div class="font-body text-[13px] leading-[1.6] tracking-[-0.01em] text-[#123236] sm:text-right sm:text-white/55">
+          <p>Ambotics ApS © 2026</p>
+          <p>Siljangade 1, 2300 Copenhagen S</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Carousel arrows — scroll by one card width.
+    (function () {
+      const track = document.getElementById('carousel');
+      if (!track) return;
+      const step = () => {
+        const card = track.querySelector('figure');
+        return card ? card.getBoundingClientRect().width + 10 : track.clientWidth * 0.8;
+      };
+      document.querySelectorAll('[data-dir]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          track.scrollBy({ left: Number(btn.dataset.dir) * step(), behavior: 'smooth' });
+        });
+      });
+    })();
+
+    // Scroll-spy — darken the nav link for the section currently in view.
+    (function () {
+      const links = [...document.querySelectorAll('#nav [data-spy]')];
+      if (!links.length) return;
+      const sections = links
+        .map((l) => document.getElementById(l.dataset.spy))
+        .filter(Boolean);
+      let active = null;
+      const setActive = (id) => {
+        if (id === active) return;
+        active = id;
+        links.forEach((l) => l.classList.toggle('text-ink', l.dataset.spy === id));
+      };
+      const io = new IntersectionObserver(
+        (entries) => {
+          const seen = entries.filter((e) => e.isIntersecting);
+          if (!seen.length) return;
+          seen.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          setActive(seen[0].target.id);
+        },
+        { rootMargin: '-25% 0px -55% 0px', threshold: [0, 0.2, 0.5, 1] }
+      );
+      sections.forEach((s) => io.observe(s));
+      setActive('starting');
+    })();
+  </script>
+</body>
+</html>
