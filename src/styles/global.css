@@ -4,6 +4,12 @@
 @theme {
   --color-page: #f4f4f4;
   --color-ink: #2b2b2b;
+
+  /* Working-class blue: workwear and painted machinery, not lab equipment.
+     It signals that an Ambotics robot is meant for actual work, so it is spent
+     only on things that DO something — the CTA, the footer, focus rings,
+     selection. Never decoration; everything else stays grayscale.
+     See "Design system" in README.md before reusing or retinting it. */
   --color-accent: #185de4;
   --color-accent-hover: #1450c4;
   --color-muted: #a8a8a8;
