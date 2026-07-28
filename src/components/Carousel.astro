@@ -1,0 +1,81 @@
+---
+import { Image } from 'astro:assets';
+import { applications } from '../data/applications';
+---
+
+<section id="applications" class="mt-24 group/carousel relative">
+  <div
+    id="carousel"
+    class="carousel flex gap-[10px] overflow-x-auto -mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]"
+  >
+    {
+      applications.map(({ label, image }) => (
+        <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+          <Image
+            src={image}
+            alt={label}
+            widths={[583, 1166]}
+            sizes="(max-width: 640px) 80vw, 583px"
+            loading="lazy"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">
+            {label}
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+
+  <button
+    type="button"
+    data-dir="-1"
+    aria-label="Previous"
+    aria-controls="carousel"
+    class="absolute left-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+  >
+    <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <path
+        d="M22.5 12.5 15 20l7.5 7.5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    data-dir="1"
+    aria-label="Next"
+    aria-controls="carousel"
+    class="absolute right-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+  >
+    <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <path
+        d="M17.5 12.5 25 20l-7.5 7.5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </button>
+</section>
+
+<script>
+  // Carousel arrows — scroll by one card width.
+  const track = document.getElementById('carousel');
+
+  if (track) {
+    const step = () => {
+      const card = track.querySelector('figure');
+      return card ? card.getBoundingClientRect().width + 10 : track.clientWidth * 0.8;
+    };
+
+    document.querySelectorAll<HTMLElement>('[data-dir]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        track.scrollBy({ left: Number(btn.dataset.dir) * step(), behavior: 'smooth' });
+      });
+    });
+  }
+</script>

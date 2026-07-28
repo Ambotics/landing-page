@@ -1,0 +1,81 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Carousel from '../components/Carousel.astro';
+import ContactForm from '../components/ContactForm.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Ambotics™" description="A new robotics company. Coming soon.">
+  <main id="top" class="min-h-screen w-full">
+    <div
+      class="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-[84px] pt-16 sm:pt-20 lg:pt-[104px] pb-24"
+    >
+      <!-- Single grid: sticky left sidebar (logo + nav) + content -->
+      <div class="lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">
+        <Sidebar />
+
+        <!-- Content column -->
+        <div class="min-w-0 mt-14 lg:mt-0">
+          <h1
+            class="font-display ss01 max-w-[360px] text-[clamp(28px,5vw,32px)] font-medium leading-[1.05] tracking-[-0.02em] text-ink"
+          >
+            A new kind of robotics company.
+          </h1>
+
+          <div class="mt-14 lg:mt-20">
+            <section
+              id="starting"
+              class="max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
+            >
+              <p>
+                Robotics has spent most of its life as a demonstration. Impressive in a
+                lab, filmed in slow motion, explained in a language only engineers could
+                follow, and almost never present in the rooms where real work actually
+                gets done.
+              </p>
+              <p>
+                Most companies in this field still build for the lab. They lead with the
+                hardware and the breakthrough, and they speak to other engineers. We do
+                the opposite. We lead with your business, in plain language, about your
+                problem. If automating a task does not produce a real return for your
+                operation, we will not take it on. That discipline is not a limitation.
+                It is the whole promise.
+              </p>
+              <p>
+                We own the entire stack: software, hardware, data, training, and model
+                evaluation, so we can iterate faster than anyone else. When we do take
+                something on, we own all of it. The hardware, the installation, the daily
+                operation, and the support that keeps everything running long after the
+                first day. You will never have to become a robotics expert or assemble a
+                line of vendors to make it work. You show us where the repetitive work
+                lives. We carry the rest.
+              </p>
+            </section>
+
+            <Carousel />
+
+            <section
+              class="mt-24 max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
+            >
+              <p>
+                Most of our customers start in the same place. They have a sense that
+                something in their operation could be done better, and they are not sure
+                what is possible or where to begin.
+              </p>
+              <p>
+                Tell us where the repetitive work lives. We will tell you plainly whether
+                there is a case for automating it. If there is, we will build it, run it,
+                and stand behind it.
+              </p>
+            </section>
+
+            <ContactForm />
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>

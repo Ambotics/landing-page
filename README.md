@@ -1,43 +1,96 @@
 # Ambotics™ — landing page
 
-A faithful recreation of [ambotics.framer.website](https://ambotics.framer.website),
-rebuilt with plain HTML + Tailwind CSS (no Framer, no build step).
+A recreation of [ambotics.framer.website](https://ambotics.framer.website),
+built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub Pages.
 
-## Run
-
-Just open the file — there is no build:
+## Develop
 
 ```bash
-open index.html            # macOS
-# or serve it
-python3 -m http.server 8000   # then visit http://localhost:8000
+npm install
+npm run dev        # http://localhost:4321
 ```
+
+| Command           | What it does                             |
+| ----------------- | ---------------------------------------- |
+| `npm run dev`     | Dev server with HMR                      |
+| `npm run build`   | Static build into `dist/`                |
+| `npm run preview` | Serve `dist/` locally                    |
+| `npx astro check` | Type-check `.astro`/`.ts` files          |
 
 ## Structure
 
 ```
-index.html        # the whole page
-assets/           # images (renamed from the originals)
-  manufacturing.jpg  hospitality.jpg  logistics.jpg
-  retail.jpg         food-beverage.jpg  og-image.png
+astro.config.mjs          # site URL + Tailwind Vite plugin
+public/
+  CNAME                   # custom domain for GitHub Pages
+  og-image.png            # favicon + social card (needs an absolute URL, so it stays here)
+src/
+  assets/                 # carousel photos — optimised at build time by astro:assets
+  components/
+    Carousel.astro        # scroll-snap carousel + arrow buttons
+    ContactForm.astro     # email capture (currently inert — see below)
+    Footer.astro          # gradient footer with grain overlay
+    Sidebar.astro         # logo, section nav, scroll-spy
+    Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
+  data/applications.ts    # carousel entries (label + image)
+  layouts/Layout.astro    # <head>, meta/OG tags, font loading
+  pages/index.astro       # the page
+  styles/global.css       # Tailwind import, @theme tokens, footer gradient
+.github/workflows/deploy.yml
 ```
 
 ## How it's built
 
-- **Tailwind** via the Play CDN, configured inline in `index.html` (colors, fonts, spacing).
-- **Fonts** from Google Fonts — `Gabarito` (display/logo), `Inter` (body), `Instrument Sans` (UI labels), matching the source.
+- **Tailwind v4** via `@tailwindcss/vite`. The old inline `tailwind.config` object now lives
+  as CSS custom properties in the `@theme` block of `src/styles/global.css`
+  (`--color-ink`, `--font-display`, `--container-content`, …), which is what generates
+  `text-ink`, `font-display`, `max-w-content`, and friends.
+- **Palette** — edit these in the `@theme` block; every utility follows.
+
+  | Token                  | Value     | Used for                                           |
+  | ---------------------- | --------- | -------------------------------------------------- |
+  | `--color-page`         | `#f4f4f4` | Page background                                    |
+  | `--color-ink`          | `#2b2b2b` | Headings and body copy                             |
+  | `--color-accent`       | `#185de4` | CTA button, active/hover nav, focus rings, selection |
+  | `--color-accent-hover` | `#1450c4` | CTA hover                                          |
+  | `--color-muted`        | `#a8a8a8` | Wordmark                                           |
+  | `--color-nav`          | `#808080` | Idle nav links                                     |
+  | `--color-field`        | `#ededed` | Form field background                              |
+
+  Note the scroll-spy in `Sidebar.astro` toggles the literal class `text-accent` from
+  JavaScript — Tailwind picks it up by scanning the file, so renaming the token means
+  updating that string too.
+- **Fonts** from Google Fonts — `Gabarito` (display/logo), `Inter` (body),
+  `Instrument Sans` (UI labels) — plus `Satoshi` from Fontshare for the form.
+- **Images** go through `astro:assets`, which emits responsive WebP at 583w/1166w.
+  This takes the carousel from ~3.4 MB of JPEG down to ~180 KB.
 - **Layout** — a left sidebar (logo + section nav) beside a content column on desktop;
-  a single column on mobile with the nav hidden, mirroring the original responsive behaviour.
-- **Carousel** — native horizontal scroll with CSS scroll-snap and two hover-revealed
-  chevron arrows driven by ~15 lines of vanilla JS.
+  a single column on mobile with the nav hidden.
+- **Scripts** — the carousel arrows and the nav scroll-spy are plain `<script>` tags in
+  their components; Astro bundles and inlines them. No client-side framework.
 
-### Going to production
+## Deploying
 
-The Tailwind Play CDN prints a console warning and ships the full engine. To remove it,
-compile a static stylesheet instead:
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds with
+`withastro/action` and publishes via `actions/deploy-pages`.
 
-```bash
-npx tailwindcss -i input.css -o style.css --minify
-```
+One-time setup in the repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
-…then drop the `<script src="https://cdn.tailwindcss.com">` tag and link `style.css`.
+### Custom domain
+
+The site is configured for `ambotics.com`, in two places that must agree:
+
+- `public/CNAME` — copied verbatim into `dist/`, this is what GitHub Pages reads
+- `site` in `astro.config.mjs` — used to build the absolute canonical and OG image URLs
+
+DNS for an apex domain needs `A` records pointing at GitHub's Pages IPs
+(`185.199.108.153`, `.109.153`, `.110.153`, `.111.153`); a `www` subdomain instead needs a
+`CNAME` to `<user>.github.io`.
+
+To serve from `ambotics.github.io/landing-page` instead, delete `public/CNAME` and set
+`base: '/landing-page'` alongside `site` in `astro.config.mjs`.
+
+## Notes
+
+- The email form has no backend — submitting is prevented, matching the original page.
+  Point the `<form>` at a handler (Formspree, Buttondown, a Worker) to make it live.

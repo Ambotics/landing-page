@@ -1,0 +1,54 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
+// Absolute URLs — OG/Twitter crawlers do not resolve relative paths.
+const ogImage = new URL('/og-image.png', Astro.site ?? Astro.url).href;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="icon" href="/og-image.png" />
+
+    <!-- Fonts: Gabarito (display), Inter (body), Instrument Sans (UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400..700&family=Inter:wght@300..600&family=Instrument+Sans:wght@400..600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Satoshi (form UI) -->
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="font-body text-ink antialiased selection:bg-accent/15">
+    <slot />
+  </body>
+</html>

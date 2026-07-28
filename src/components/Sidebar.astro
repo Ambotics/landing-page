@@ -1,0 +1,66 @@
+---
+import Wordmark from './Wordmark.astro';
+
+const links = [
+  { id: 'starting', label: 'Starting point' },
+  { id: 'applications', label: 'Applications' },
+  { id: 'contact', label: 'Get in touch' },
+];
+---
+
+<aside class="lg:sticky lg:top-[40px] lg:self-start">
+  <Wordmark
+    href="#top"
+    class="inline-block text-[27px] font-semibold text-muted"
+  />
+
+  <nav
+    id="nav"
+    class="hidden lg:flex flex-col gap-[12px] mt-[120px] font-body text-[14px] tracking-[-0.02em] text-nav"
+  >
+    {
+      links.map((link) => (
+        <a
+          href={`#${link.id}`}
+          data-spy={link.id}
+          class="w-fit transition-colors duration-300 hover:text-accent focus-visible:text-accent focus-visible:outline-none"
+        >
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+</aside>
+
+<script>
+  // Scroll-spy — darken the nav link for the section currently in view.
+  const links = [
+    ...document.querySelectorAll<HTMLAnchorElement>('#nav [data-spy]'),
+  ];
+
+  if (links.length) {
+    const sections = links
+      .map((l) => document.getElementById(l.dataset.spy!))
+      .filter((s): s is HTMLElement => Boolean(s));
+
+    let active: string | null = null;
+    const setActive = (id: string) => {
+      if (id === active) return;
+      active = id;
+      links.forEach((l) => l.classList.toggle('text-accent', l.dataset.spy === id));
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const seen = entries.filter((e) => e.isIntersecting);
+        if (!seen.length) return;
+        seen.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        setActive(seen[0].target.id);
+      },
+      { rootMargin: '-25% 0px -55% 0px', threshold: [0, 0.2, 0.5, 1] }
+    );
+
+    sections.forEach((s) => io.observe(s));
+    setActive('starting');
+  }
+</script>

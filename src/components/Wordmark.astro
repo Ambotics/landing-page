@@ -1,0 +1,16 @@
+---
+interface Props {
+  href?: string;
+  class?: string;
+}
+
+const { href, class: className = '' } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+
+<Tag
+  href={href}
+  class:list={['font-display ss01 leading-none tracking-[-0.02em]', className]}
+>
+  Ambotics<sup class="text-[0.42em] align-super tracking-normal">™</sup>
+</Tag>

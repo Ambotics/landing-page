@@ -1,0 +1,36 @@
+---
+// No backend yet — the form is inert, exactly as in the original page.
+// Point `action` at a form handler (Formspree, Buttondown, a Worker, …) to make it live.
+---
+
+<section id="contact" class="mt-16 max-w-content">
+  <form
+    class="flex items-center rounded-full bg-field p-[6px] pl-5 transition-shadow focus-within:ring-2 focus-within:ring-accent/35"
+    data-notify
+  >
+    <label for="notify-email" class="sr-only">Email address</label>
+    <input
+      id="notify-email"
+      name="email"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="name@email.com"
+      required
+      class="min-w-0 flex-1 bg-transparent font-sat text-[15px] tracking-[-0.01em] text-ink outline-none"
+    />
+    <button
+      type="submit"
+      class="shrink-0 rounded-full bg-accent px-5 py-[10px] font-sat text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-[background-color,transform] hover:bg-accent-hover active:scale-[0.98]"
+    >
+      Notify me
+    </button>
+  </form>
+</section>
+
+<script>
+  document.querySelector<HTMLFormElement>('form[data-notify]')?.addEventListener(
+    'submit',
+    (event) => event.preventDefault()
+  );
+</script>
