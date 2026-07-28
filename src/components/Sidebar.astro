@@ -23,7 +23,7 @@ const links = [
         <a
           href={`#${link.id}`}
           data-spy={link.id}
-          class="w-fit transition-colors duration-300 hover:text-accent focus-visible:text-accent focus-visible:outline-none"
+          class="w-fit transition-colors duration-300 hover:text-ink focus-visible:text-ink focus-visible:outline-none"
         >
           {link.label}
         </a>
@@ -47,7 +47,7 @@ const links = [
     const setActive = (id: string) => {
       if (id === active) return;
       active = id;
-      links.forEach((l) => l.classList.toggle('text-accent', l.dataset.spy === id));
+      links.forEach((l) => l.classList.toggle('text-ink', l.dataset.spy === id));
     };
 
     const io = new IntersectionObserver(

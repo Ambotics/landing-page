@@ -29,13 +29,13 @@ src/
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons
     ContactForm.astro     # email capture (currently inert — see below)
-    Footer.astro          # gradient footer with grain overlay
+    Footer.astro          # accent-blue footer with grain overlay
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
-  styles/global.css       # Tailwind import, @theme tokens, footer gradient
+  styles/global.css       # Tailwind import, @theme tokens, grain overlay
 .github/workflows/deploy.yml
 ```
 
@@ -50,14 +50,14 @@ src/
   | Token                  | Value     | Used for                                           |
   | ---------------------- | --------- | -------------------------------------------------- |
   | `--color-page`         | `#f4f4f4` | Page background                                    |
-  | `--color-ink`          | `#2b2b2b` | Headings and body copy                             |
-  | `--color-accent`       | `#185de4` | CTA button, active/hover nav, focus rings, selection |
+  | `--color-ink`          | `#2b2b2b` | Headings, body copy, active/hover nav              |
+  | `--color-accent`       | `#185de4` | CTA button, footer background, focus rings, selection |
   | `--color-accent-hover` | `#1450c4` | CTA hover                                          |
   | `--color-muted`        | `#a8a8a8` | Wordmark                                           |
   | `--color-nav`          | `#808080` | Idle nav links                                     |
   | `--color-field`        | `#ededed` | Form field background                              |
 
-  Note the scroll-spy in `Sidebar.astro` toggles the literal class `text-accent` from
+  Note the scroll-spy in `Sidebar.astro` toggles the literal class `text-ink` from
   JavaScript — Tailwind picks it up by scanning the file, so renaming the token means
   updating that string too.
 - **Fonts** from Google Fonts — `Gabarito` (display/logo), `Inter` (body),
