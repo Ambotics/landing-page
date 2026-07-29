@@ -50,9 +50,10 @@ and your problem. An Ambotics robot is meant for **actual work**, and the palett
 say so before anyone reads a word.
 
 That gives the accent a job, and the job comes with a rule: **the blue only ever marks
-something real.** It appears on the one thing a visitor can act on (the "Notify me"
-button), on the footer that closes the page, and on focus rings and text selection —
-places where it signals *this responds to you*. It is never decoration.
+something real.** It appears on the footer that closes the page, and on focus rings and
+text selection — places where it signals *this responds to you*. It is never decoration.
+The one thing a visitor can act on, the "Notify me" button, is `signal` yellow; the blue
+still owns the plane behind it and the focus state around it.
 
 Everything else stays in a plain grayscale — `#f4f4f4` page, `#2b2b2b` copy, gray nav —
 so the blue never has to compete for attention. When you add a component, the default is
@@ -66,6 +67,44 @@ Two practical consequences:
   secondary copy on it (4.53:1, AA). The accent on `#f4f4f4` is 5.13:1, so it is also
   safe for small text on the page background if a future element needs it.
 
+### The yellow is the "act on this" color
+
+`#ffe01f` is safety yellow — machine controls, hazard marking, lockout tags. It is the
+color that actually appears alongside workwear blue on a shop floor, which is why it
+extends the argument the blue makes instead of diluting it. It does two jobs: it carries
+the one thing a visitor can act on (the "Notify me" button), and it marks edges within
+blue surfaces (the footer keyline). Like the blue, it is never decoration.
+
+**The split is fill vs. text, not blue vs. sand:**
+
+| Use | Token | Why |
+| --- | --- | --- |
+| A fill, on any surface | `signal` + an `ink` label | The label carries the contrast at 10.74:1 |
+| Text or a mark on the blue | `signal`, ≥24px / ≥18.66px bold | 4.28:1 — large text and graphics only |
+| Text or a mark on sand / field | `signal-deep` | 5.89:1 and 5.53:1 — unrestricted |
+
+Three limits worth knowing:
+
+- **A `signal` fill must carry an `ink` label.** `ink` on `signal` is 10.74:1, and that is
+  what identifies the control under WCAG 1.4.11 — the fill itself is only 1.13:1 against
+  the `field` pill, so the shape's edge is explicitly *not* doing that work. Never pair a
+  yellow fill with a white label, and never rely on the pill outline alone.
+- **`signal` never carries body copy on the blue.** At 4.28:1 it is legal for ≥24px
+  regular, ≥18.66px bold, icons, and rules — not for anything smaller. Small copy on blue
+  stays white / `text-white/85`.
+- **`signal` is never text on the sand.** At ~1.2:1 it is illegible there. That is what
+  `signal-deep` exists for.
+
+`signal-deep` is the same hue at half the lightness — `hsl(50 100% 22%)` against the
+bright's `hsl(52 100% 56%)` — so the two read as one family. It carries no restrictions:
+5.89:1 on the page, 5.53:1 on the field, 6.48:1 on white.
+
+Worth knowing why the obvious choices lost, so they don't get re-proposed: safety orange
+is 2.01:1 on this blue and signal red is 1.32:1, both failing even the 3:1 UI floor.
+Orange-on-blue is a *hue* contrast and WCAG scores *luminance*. For the same reason a
+dark accent is impossible here — the ceiling for anything darker than `#185de4` is 3.72:1,
+and that is pure black. A contrast color on this blue has to be a bright one.
+
 ### Palette
 
 Edit these in the `@theme` block of `src/styles/global.css`; every utility follows.
@@ -74,8 +113,11 @@ Edit these in the `@theme` block of `src/styles/global.css`; every utility follo
 | ---------------------- | --------- | ----------------------------------------------------- |
 | `--color-page`         | `#f4f4f4` | Page background                                       |
 | `--color-ink`          | `#2b2b2b` | Headings, body copy, active/hover nav                 |
-| `--color-accent`       | `#185de4` | CTA button, footer background, focus rings, selection |
-| `--color-accent-hover` | `#1450c4` | CTA hover                                             |
+| `--color-accent`       | `#185de4` | Footer background, focus rings, selection             |
+| `--color-accent-hover` | `#1450c4` | Reserved — no blue-filled control on the page today   |
+| `--color-signal`       | `#ffe01f` | CTA fill (with an `ink` label), footer keyline, marks on blue |
+| `--color-signal-hover` | `#efce00` | CTA hover                                             |
+| `--color-signal-deep`  | `#6f5d00` | The same yellow, for text and marks on sand or field  |
 | `--color-muted`        | `#a8a8a8` | Wordmark                                              |
 | `--color-nav`          | `#808080` | Idle nav links                                        |
 | `--color-field`        | `#ededed` | Form field background                                 |

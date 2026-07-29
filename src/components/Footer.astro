@@ -12,7 +12,12 @@ const year = 2026;
     <div
       class="relative z-10 mx-auto flex w-full max-w-[1440px] flex-col gap-10 px-6 py-24 sm:flex-row sm:items-center sm:justify-between sm:px-10 lg:px-[74px]"
     >
-      <Wordmark class="text-[28px] font-semibold text-white" />
+      <div>
+        <!-- Marking keyline. Signal yellow is a graphic object here (3:1 floor), not
+             text — see the surface rule in README.md before reusing it. -->
+        <div class="mb-5 h-[3px] w-11 rounded-full bg-signal" aria-hidden="true"></div>
+        <Wordmark class="block text-[28px] font-semibold text-white" />
+      </div>
       <div
         class="font-body text-[13px] leading-[1.6] tracking-[-0.01em] text-white/85 sm:text-right"
       >
