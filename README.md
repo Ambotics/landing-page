@@ -52,8 +52,11 @@ say so before anyone reads a word.
 That gives the accent a job, and the job comes with a rule: **the blue only ever marks
 something real.** It appears on the footer that closes the page, and on focus rings and
 text selection — places where it signals *this responds to you*. It is never decoration.
-The one thing a visitor can act on, the "Notify me" button, is `signal` yellow; the blue
-still owns the plane behind it and the focus state around it.
+
+The "Notify me" button is filled with `ink` rather than the accent. That is the
+grayscale-default rule applied to the most important control on the page: it earns
+attention through weight, not hue, and the blue stays on the plane behind it and the focus
+ring around it.
 
 Everything else stays in a plain grayscale — `#f4f4f4` page, `#2b2b2b` copy, gray nav —
 so the blue never has to compete for attention. When you add a component, the default is
@@ -67,43 +70,33 @@ Two practical consequences:
   secondary copy on it (4.53:1, AA). The accent on `#f4f4f4` is 5.13:1, so it is also
   safe for small text on the page background if a future element needs it.
 
-### The yellow is the "act on this" color
+### The CTA is ink
 
-`#ffe01f` is safety yellow — machine controls, hazard marking, lockout tags. It is the
-color that actually appears alongside workwear blue on a shop floor, which is why it
-extends the argument the blue makes instead of diluting it. It does two jobs: it carries
-the one thing a visitor can act on (the "Notify me" button), and it marks edges within
-blue surfaces (the footer keyline). Like the blue, it is never decoration.
+The "Notify me" button is `bg-ink text-white hover:bg-ink-hover`. White on ink is 14.16:1,
+and the fill is 12.09:1 against the `#ededed` field pill, so both the label and the
+control's own edge are far clear of AA. A neutral button is the grayscale-default rule
+applied to the most important control on the page — it earns attention through weight
+rather than hue, which leaves the blue free to mean *this responds to you*.
 
-**The split is fill vs. text, not blue vs. sand:**
+Because of that, `--color-accent-hover` has no use site today. It stays in the palette
+rather than being deleted.
 
-| Use | Token | Why |
-| --- | --- | --- |
-| A fill, on any surface | `signal` + an `ink` label | The label carries the contrast at 10.74:1 |
-| Text or a mark on the blue | `signal`, ≥24px / ≥18.66px bold | 4.28:1 — large text and graphics only |
-| Text or a mark on sand / field | `signal-deep` | 5.89:1 and 5.53:1 — unrestricted |
+### Why the palette stays at three colors
 
-Three limits worth knowing:
+A fourth color — safety yellow, for the button and a footer keyline — was built and then
+removed. The measurements are kept here so the ground isn't re-covered:
 
-- **A `signal` fill must carry an `ink` label.** `ink` on `signal` is 10.74:1, and that is
-  what identifies the control under WCAG 1.4.11 — the fill itself is only 1.13:1 against
-  the `field` pill, so the shape's edge is explicitly *not* doing that work. Never pair a
-  yellow fill with a white label, and never rely on the pill outline alone.
-- **`signal` never carries body copy on the blue.** At 4.28:1 it is legal for ≥24px
-  regular, ≥18.66px bold, icons, and rules — not for anything smaller. Small copy on blue
-  stays white / `text-white/85`.
-- **`signal` is never text on the sand.** At ~1.2:1 it is illegible there. That is what
-  `signal-deep` exists for.
-
-`signal-deep` is the same hue at half the lightness — `hsl(50 100% 22%)` against the
-bright's `hsl(52 100% 56%)` — so the two read as one family. It carries no restrictions:
-5.89:1 on the page, 5.53:1 on the field, 6.48:1 on white.
-
-Worth knowing why the obvious choices lost, so they don't get re-proposed: safety orange
-is 2.01:1 on this blue and signal red is 1.32:1, both failing even the 3:1 UI floor.
-Orange-on-blue is a *hue* contrast and WCAG scores *luminance*. For the same reason a
-dark accent is impossible here — the ceiling for anything darker than `#185de4` is 3.72:1,
-and that is pure black. A contrast color on this blue has to be a bright one.
+- **Nothing dark can sit on the blue.** The ceiling for anything darker than `#185de4` is
+  3.72:1, and that is pure black. Ink on the blue is 2.51:1.
+- **Orange and red fail too** — 2.01:1 and 1.32:1 on the blue, under even the 3:1 UI floor.
+  Orange-on-blue is a *hue* contrast and WCAG scores *luminance*. That is why the attempt
+  had to go bright, and why it landed on yellow.
+- **A bright fill on the sand has a near-invisible edge.** Safety yellow measured 1.13:1
+  against the field pill. Arguably conformant under WCAG 1.4.11, since a 10.74:1 label
+  identifies the control — but ink at 12.09:1 sidesteps the question.
+- **The real bar for a fourth color** is clearing 4.5:1 against *both* `#185de4` and
+  `#f4f4f4`. Almost nothing does, which is the honest reason the palette is three colors
+  and not four.
 
 ### Palette
 
@@ -112,12 +105,10 @@ Edit these in the `@theme` block of `src/styles/global.css`; every utility follo
 | Token                  | Value     | Used for                                              |
 | ---------------------- | --------- | ----------------------------------------------------- |
 | `--color-page`         | `#f4f4f4` | Page background                                       |
-| `--color-ink`          | `#2b2b2b` | Headings, body copy, active/hover nav                 |
+| `--color-ink`          | `#2b2b2b` | Headings, body copy, active/hover nav, CTA fill       |
+| `--color-ink-hover`    | `#3d3d3d` | CTA hover                                             |
 | `--color-accent`       | `#185de4` | Footer background, focus rings, selection             |
 | `--color-accent-hover` | `#1450c4` | Reserved — no blue-filled control on the page today   |
-| `--color-signal`       | `#ffe01f` | CTA fill (with an `ink` label), footer keyline, marks on blue |
-| `--color-signal-hover` | `#efce00` | CTA hover                                             |
-| `--color-signal-deep`  | `#6f5d00` | The same yellow, for text and marks on sand or field  |
 | `--color-muted`        | `#a8a8a8` | Wordmark                                              |
 | `--color-nav`          | `#808080` | Idle nav links                                        |
 | `--color-field`        | `#ededed` | Form field background                                 |

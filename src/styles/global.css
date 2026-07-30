@@ -3,27 +3,20 @@
 /* Design tokens — the Tailwind v3 `theme.extend` object, ported to v4 CSS vars. */
 @theme {
   --color-page: #f4f4f4;
+
+  /* Ink also fills the CTA. White on ink is 14.16:1 and the fill is 12.09:1 against
+     the #ededed field pill, so both the label and the control's own edge are well
+     clear of AA — see "Design system" in README.md. */
   --color-ink: #2b2b2b;
+  --color-ink-hover: #3d3d3d;
 
   /* Working-class blue: workwear and painted machinery, not lab equipment.
      It signals that an Ambotics robot is meant for actual work, so it is spent
-     only on things that DO something — the CTA, the footer, focus rings,
-     selection. Never decoration; everything else stays grayscale.
+     only on things that DO something — the footer, focus rings, selection.
+     Never decoration; everything else stays grayscale.
      See "Design system" in README.md before reusing or retinting it. */
   --color-accent: #185de4;
   --color-accent-hover: #1450c4;
-
-  /* Signal yellow — hazard marking, lockout tags, machine guarding. The contrast
-     accent that lives ON the blue. Its job is marking, never decoration.
-     MEASURED LIMITS — do not use outside them:
-       --color-signal      on #185de4 = 4.28:1  large text / UI marks only, never body copy
-       --color-signal      on #f4f4f4 = 1.20:1  UNUSABLE — never on the page background
-       --color-signal-deep on #f4f4f4 = 5.89:1  AA, safe for small copy
-       --color-signal-deep on #ededed = 5.53:1  AA, safe on the form field
-     Pick by surface: bright on blue, deep on sand. See "Design system" in README.md. */
-  --color-signal: #ffe01f;
-  --color-signal-hover: #efce00;
-  --color-signal-deep: #6f5d00;
 
   --color-muted: #a8a8a8;
   --color-nav: #808080;
