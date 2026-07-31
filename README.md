@@ -26,13 +26,16 @@ public/
   og-image.png            # favicon + social card (needs an absolute URL, so it stays here)
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
+    logos/                # partner marks, recoloured to currentColor (see below)
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons
     ContactForm.astro     # email capture (currently inert — see below)
     Footer.astro          # accent-blue footer with grain overlay
+    LogoWall.astro        # "Our team has worked with" — inlined, single-colour logos
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
+  data/partners.ts        # logo wall entries (name + raw SVG + optical height)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
   styles/global.css       # Tailwind import, @theme tokens, grain overlay
@@ -80,6 +83,33 @@ rather than hue, which leaves the blue free to mean *this responds to you*.
 
 Because of that, `--color-accent-hover` has no use site today. It stays in the palette
 rather than being deleted.
+
+### The logo wall is one colour, not four desaturated ones
+
+`LogoWall.astro` renders the companies the team has worked with. Every mark is bound
+to `currentColor` in its SVG file, so the row idles at `nav` and warms to `ink` on
+hover — the same idle/active pair the sidebar nav uses.
+
+The obvious alternative, keeping the brand palettes and applying `filter: grayscale(1)`,
+was built first and does not work. CSS `grayscale()` preserves each mark's own
+luminance, and these four are nowhere near each other: AstraZeneca's plum computes to
+roughly 35/255, ABB's red to 55, while Universal Robots' light blue lands at 150. On one
+row that reads as four different weights, with the UR mark almost gone. Flattening
+everything to a single ink is the only treatment that makes the row look deliberate.
+
+Two consequences worth knowing:
+
+- **IKEA is the one multi-colour mark**, and it can't be flattened wholesale — box,
+  oval and letters would collapse into a solid rectangle. Its box and letters take
+  `currentColor` and its oval is filled with `var(--color-page)`, which preserves the
+  knockout. Change the page background and that oval must follow.
+- **The heading is `ink`, not `nav`.** `nav` on `page` is only 3.59:1, under AA for
+  text. The logos may sit there — WCAG exempts logotypes from contrast minimums, and
+  each carries an `sr-only` name — but the label above them may not.
+
+The logos are sized individually rather than to a common height: a filled box and a
+square symbol read much heavier than a wordmark at the same height. The per-logo
+`height` in `src/data/partners.ts` is optical, so re-tune it by eye, not by arithmetic.
 
 ### Why the palette stays at three colors
 

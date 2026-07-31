@@ -58,8 +58,22 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
+**The logo wall is a single colour.** Partner marks in `src/assets/logos/` have had their
+brand fills rewritten to `currentColor` — the geometry is untouched, the colour is not.
+`LogoWall.astro` then tints the whole row `nav`, warming to `ink` on hover. Do not "restore"
+the brand colours and reach for `filter: grayscale(1)` instead: that was built first and
+fails, because `grayscale()` keeps each mark's own luminance and these four span 35–150
+out of 255, so the row reads as four different weights. Details in `README.md`.
+
 ## Gotchas
 
+- **The IKEA logo's oval is `var(--color-page)`, not white.** It is the only multi-colour
+  mark on the wall; its box and letters are `currentColor`, and the oval has to be an
+  actual fill or the letters vanish into the box. It tracks the page background by hand —
+  change `--color-page` and you must change `src/assets/logos/ikea.svg` with it.
+- **Logo sizing is optical, not uniform.** The per-logo `height` in `src/data/partners.ts`
+  is tuned by eye: a filled box (IKEA) and a square symbol (Universal Robots) read far
+  heavier than a wordmark at the same height. Don't normalise them to one number.
 - **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
   `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
   utility only because it scans the file and finds the bare string — rename the token or
