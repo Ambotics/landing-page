@@ -104,9 +104,8 @@ cleanly and lands the h2/h1 ratio at 0.63, alongside the 0.65 of the reference p
 layout follows.
 
 `as="h3"` drops the level without changing the look, for a heading nested inside another
-section. Applications carries two of them — "With experience from" over the logo wall and
-"Where to start" over the closing copy — so the outline stays honest while the page keeps
-one heading treatment.
+section — the logo wall's "With experience from" inside Applications. The outline stays
+honest while the page keeps one heading treatment.
 
 Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
 heading with different wording reads as the wrong destination. The section `id`s are a
@@ -125,7 +124,7 @@ for anything a visitor has to read, and that includes small qualifiers: the cont
 
 `LogoWall.astro` sits inside the Applications section, under the carousel: the carousel
 shows the kinds of work, and the marks underneath say where the people doing it have done
-it before. "Where to start" then closes the section. Every mark is bound
+it before, closing the section. Every mark is bound
 to `currentColor` in its SVG file, so the row idles at `nav` and warms to `ink` on
 hover — the same idle/active pair the sidebar nav uses.
 

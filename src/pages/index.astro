@@ -81,7 +81,7 @@ import Footer from '../components/Footer.astro';
               <SectionHeading>Applications</SectionHeading>
 
               <div
-                class="mt-5 max-w-content body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
+                class="mt-5 max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
               >
                 <p>
                   None of this is theoretical for us. Our team's prior work spans IKEA,
@@ -89,36 +89,23 @@ import Footer from '../components/Footer.astro';
                   industrial robotics, and pharmaceutical production. The applications
                   below are the kinds of operation we already know from the inside.
                 </p>
+                <p>
+                  Most of our customers start in the same place. They have a sense that
+                  something in their operation could be done better, and they are not
+                  sure what is possible or where to begin. That is reasonable. The line
+                  moved recently, and it is not obvious from the outside where it now
+                  sits.
+                </p>
+                <p>
+                  Tell us where the repetitive work lives. We will tell you plainly
+                  whether there is a case for automating it. If there is, we will build
+                  it, run it, and stand behind it.
+                </p>
               </div>
 
               <Carousel class="mt-10" />
 
               <LogoWall class="mt-16" />
-
-              <!-- Folded into Applications rather than standing alone: it is the
-                   answer to the section above it — here is the kind of work, here
-                   is where we have done it, here is how you start. `h3` for the
-                   same reason the logo wall is one. -->
-              <section class="mt-16 max-w-content">
-                <SectionHeading as="h3">Where to start</SectionHeading>
-
-                <div
-                  class="mt-5 space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
-                >
-                  <p>
-                    Most of our customers start in the same place. They have a sense
-                    that something in their operation could be done better, and they
-                    are not sure what is possible or where to begin. That is
-                    reasonable. The line moved recently, and it is not obvious from
-                    the outside where it now sits.
-                  </p>
-                  <p>
-                    Tell us where the repetitive work lives. We will tell you plainly
-                    whether there is a case for automating it. If there is, we will
-                    build it, run it, and stand behind it.
-                  </p>
-                </div>
-              </section>
             </section>
 
             <ContactForm />

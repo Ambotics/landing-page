@@ -66,8 +66,8 @@ Full palette table and rationale: see **Design system** in `README.md`.
 carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
 body. Don't hand-roll a size or reach for `font-body` on a heading; add the class to the
 component so the scale stays in one file. Use `as="h3"` for a heading nested inside another
-section — Applications carries two, "With experience from" and "Where to start". The
-level changes, the treatment does not.
+section — the logo wall's "With experience from" inside Applications. The level changes,
+the treatment does not.
 
 `font-ui` at 12px is now the *form label* style, not a heading style. It labels controls,
 which is a different job from titling a section.
