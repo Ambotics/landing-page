@@ -1,9 +1,12 @@
 ---
 // No backend yet — the form is inert, exactly as in the original page.
 // Point `action` at a form handler (Formspree, Buttondown, a Worker, …) to make it live.
+import SectionHeading from './SectionHeading.astro';
 ---
 
 <section id="contact" class="mt-16 max-w-content">
+  <SectionHeading class="mb-5">Get in touch</SectionHeading>
+
   <form
     class="flex items-center rounded-full bg-field p-[6px] pl-5 transition-shadow focus-within:ring-2 focus-within:ring-accent/35"
     data-notify

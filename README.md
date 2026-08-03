@@ -32,6 +32,7 @@ src/
     ContactForm.astro     # email capture (currently inert — see below)
     Footer.astro          # accent-blue footer with grain overlay
     LogoWall.astro        # "Our team has worked with" — inlined, single-colour logos
+    SectionHeading.astro  # the one <h2> treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
@@ -83,6 +84,32 @@ rather than hue, which leaves the blue free to mean *this responds to you*.
 
 Because of that, `--color-accent-hover` has no use site today. It stays in the palette
 rather than being deleted.
+
+### Two heading looks, and only two
+
+Every section heading renders through `SectionHeading.astro` in the display face —
+Gabarito with `ss01`, the H1's own treatment — so the page reads as one typographic voice
+and size alone establishes the hierarchy:
+
+| Level                    | Size                    | Face                    |
+| ------------------------ | ----------------------- | ----------------------- |
+| H1                       | `clamp(28px,5vw,32px)`  | Gabarito `ss01`, 500    |
+| Section heading (`h2`)    | 20px                    | Gabarito `ss01`, 500    |
+| Body                     | 14px                    | Inter, 460              |
+
+20px was picked by measuring, not by ratio arithmetic. At 18px the heading reads as a
+bolded first line of the paragraph beneath it rather than as a heading; 20px separates
+cleanly and lands the h2/h1 ratio at 0.63, alongside the 0.65 of the reference page this
+layout follows.
+
+The logo wall's "Our team has worked with" stays a 12px uppercase `font-ui` eyebrow. It
+labels a row of marks rather than titling a section, and in the display face it competes
+with the headings on either side of it.
+
+Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
+heading with different wording reads as the wrong destination. The section `id`s are a
+separate contract with the scroll-spy and deliberately do not track the copy: `#starting`
+still points at the section now headed "What changed".
 
 ### The logo wall is one colour, not four desaturated ones
 

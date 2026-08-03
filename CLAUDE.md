@@ -58,6 +58,20 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
+**Section headings go through `SectionHeading.astro`, and there are only two heading
+looks.** The display face (Gabarito + `ss01`) carries the H1 *and* every section heading —
+20px against the H1's 28–32px and the 14px body. Don't hand-roll a third size or reach for
+`font-body` on a heading; add the class to the component so the scale stays in one file.
+The one exception is deliberate: the logo wall's "Our team has worked with" is a 12px
+uppercase `font-ui` eyebrow, because it labels a row of marks rather than titling a
+section, and promoting it to the display face makes it compete with the real headings
+around it.
+
+Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
+heading worded differently reads as the wrong destination. Change one, change the other.
+The `id`s are a separate contract with the scroll-spy and do not follow the copy (`starting`
+still points at the "What changed" section).
+
 **The logo wall is a single colour.** Partner marks in `src/assets/logos/` have had their
 brand fills rewritten to `currentColor` — the geometry is untouched, the colour is not.
 `LogoWall.astro` then tints the whole row `nav`, warming to `ink` on hover. Do not "restore"

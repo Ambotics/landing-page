@@ -1,0 +1,30 @@
+---
+// Section headings — the display face, one step down from the H1.
+//
+// Gabarito with `ss01` is the H1's treatment, so a section heading reads as the
+// same voice rather than a second typographic system. Size is the only thing
+// that separates them: 20px against the H1's 28–32px and the 14px body, which
+// keeps the H1 unambiguously the page title.
+//
+// 20px was measured against 18px in the browser, not guessed. At 18px the
+// heading reads as a bolded first line of the paragraph rather than a heading;
+// 20px separates cleanly and puts the h2/h1 ratio at 0.63, next to the 0.65 of
+// the reference page this layout is drawn from.
+//
+// Grayscale by default, like everything that is not a response state — a heading
+// announces, it does not do anything. See "Design system" in README.md.
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
+---
+
+<h2
+  class:list={[
+    'font-display ss01 text-[20px] font-medium leading-[1.2] tracking-[-0.02em] text-ink',
+    className,
+  ]}
+>
+  <slot />
+</h2>
