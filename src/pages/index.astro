@@ -1,8 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Sidebar from '../components/Sidebar.astro';
+import SectionHeading from '../components/SectionHeading.astro';
 import Carousel from '../components/Carousel.astro';
-import LogoWall from '../components/LogoWall.astro';
 import ContactForm from '../components/ContactForm.astro';
 import Footer from '../components/Footer.astro';
 ---
@@ -25,66 +25,79 @@ import Footer from '../components/Footer.astro';
           </h1>
 
           <div class="mt-14 lg:mt-20">
-            <section
-              id="starting"
-              class="max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
-            >
-              <p>
-                Robots are not new. They have been welding, painting, and lifting in
-                factories since the 1960s, and they have been very good at it. The catch
-                was always the conditions. A conventional robot needs the world held
-                still around it — parts in fixed positions, a cage, and a program written
-                for exactly one task. Change the task and you pay for the integration all
-                over again. That is why robots filled car plants and stayed rare nearly
-                everywhere else.
-              </p>
-              <p>
-                AI is what changed. A robot can now see what is actually in front of it,
-                handle parts that arrive at odd angles, and pick up a new task by being
-                shown it instead of being reprogrammed. That sounds like a technical
-                detail. It is not. It moves the line of what is worth automating. Small
-                batches, frequent changeovers, and jobs that vary a little every time are
-                now within reach.
-              </p>
-              <p>
-                So the question stops being whether a machine can physically do the work.
-                It becomes whether doing it that way pays. That is a business question,
-                and most companies in this field are not built to answer it. They lead
-                with the hardware and the breakthrough, and they speak to other engineers.
-                We do the opposite. We lead with your business, in plain language, about
-                your problem. If automating a task does not produce a real return for your
-                operation, we will not take it on. That discipline is not a limitation. It
-                is the whole promise.
-              </p>
-              <p>
-                We own the entire stack: software, hardware, data, training, and model
-                evaluation, so we can iterate faster than anyone else. When we do take
-                something on, we own all of it. The hardware, the installation, the daily
-                operation, and the support that keeps everything running long after the
-                first day. You will never have to become a robotics expert or assemble a
-                line of vendors to make it work. You show us where the repetitive work
-                lives. We carry the rest.
-              </p>
+            <!-- The four paragraphs are one continuous argument — ¶3 opens "So the
+                 question stops being…" — so the section takes a single heading
+                 rather than being split at a seam it does not have. -->
+            <section id="starting" class="max-w-content">
+              <SectionHeading>What changed</SectionHeading>
+
+              <div
+                class="mt-5 space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
+              >
+                <p>
+                  Robots aren't new. They've been welding and painting in factories
+                  since the 1960s and they're very good at it. The catch was always the
+                  conditions around them. A conventional robot needs the world held
+                  still: parts in fixed positions, a cage, a program written for exactly
+                  one task. Change the task and you pay for the integration again.
+                  That's why robots filled car plants and stayed rare almost everywhere
+                  else.
+                </p>
+                <p>
+                  AI is what changed. A robot can now see what's actually in front of
+                  it, handle parts that arrive at odd angles, and pick up a new task by
+                  being shown it rather than reprogrammed. That moves the line of what's
+                  worth automating. Small batches, frequent changeovers and jobs that
+                  vary a little every time are all within reach now.
+                </p>
+                <p>
+                  So the question isn't really whether a machine can do the work. It's
+                  whether doing it that way pays. That's a business question, and most
+                  companies in this field aren't built to answer it — they lead with the
+                  hardware and talk to other engineers. We'd rather start with your
+                  operation and what the work actually costs you. If automating a task
+                  won't produce a real return, we'll tell you and leave it alone.
+                </p>
+                <p>
+                  We build the whole stack ourselves: software, hardware, data, training
+                  and evaluation. That means we can change things quickly instead of
+                  waiting on a supplier. And when we take a job on, we take all of it —
+                  the hardware, the installation, the daily running and the support long
+                  after the first day. You shouldn't have to become a robotics expert or
+                  line up a row of vendors to keep it working.
+                </p>
+              </div>
             </section>
 
-            <LogoWall />
+            <!-- The section is deliberately not `max-w-content`: the carousel
+                 bleeds to the right page edge with a negative margin, so the
+                 width cap goes on the prose and the logo wall individually. -->
+            <section id="applications" class="mt-24">
+              <SectionHeading>Applications</SectionHeading>
 
-            <Carousel />
+              <div
+                class="mt-5 max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
+              >
+                <p>
+                  Our team has worked with IKEA, ABB, AstraZeneca and Universal Robots,
+                  in retail distribution, industrial robotics and pharmaceutical
+                  production. Different operations, but the same question comes up in
+                  each. Which repetitive work is worth handing to a machine?
+                </p>
+                <p>
+                  Most conversations start in the same place. Someone suspects a part of
+                  their operation could run better but doesn't know what's realistic or
+                  where to begin. That's fair enough. This has moved quickly, and
+                  there's no easy way to tell from the outside what's possible now.
+                </p>
+                <p>
+                  Tell us where the repetitive work is and we'll give you a straight
+                  answer on whether it's worth automating. If it is, we'll build it, run
+                  it and stand behind it.
+                </p>
+              </div>
 
-            <section
-              class="mt-24 max-w-content space-y-10 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
-            >
-              <p>
-                Most of our customers start in the same place. They have a sense that
-                something in their operation could be done better, and they are not sure
-                what is possible or where to begin. That is reasonable. The line moved
-                recently, and it is not obvious from the outside where it now sits.
-              </p>
-              <p>
-                Tell us where the repetitive work lives. We will tell you plainly whether
-                there is a case for automating it. If there is, we will build it, run it,
-                and stand behind it.
-              </p>
+              <Carousel class="mt-10" />
             </section>
 
             <ContactForm />

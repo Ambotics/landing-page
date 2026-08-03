@@ -1,9 +1,23 @@
 ---
 import { Image } from 'astro:assets';
 import { applications } from '../data/applications';
+
+// The track only. `#applications`, its heading and its copy live in index.astro,
+// because the section also carries the logo wall underneath this.
+//
+// `relative` must stay on this element rather than move up to the enclosing
+// <section>: the arrows are centred with `top-1/2`, and against the section they
+// would centre on heading-plus-copy-plus-track and ride low. This element is
+// still full content width — the bleed is a negative margin on #carousel itself
+// — so the buttons' left/right offsets are unaffected.
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
 ---
 
-<section id="applications" class="mt-24 group/carousel relative">
+<div class:list={['group/carousel relative', className]}>
   <div
     id="carousel"
     class="carousel flex gap-[10px] overflow-x-auto -mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]"
@@ -60,7 +74,7 @@ import { applications } from '../data/applications';
         stroke-linejoin="round"></path>
     </svg>
   </button>
-</section>
+</div>
 
 <script>
   // Carousel arrows — scroll by one card width.

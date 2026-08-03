@@ -26,16 +26,14 @@ public/
   og-image.png            # favicon + social card (needs an absolute URL, so it stays here)
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
-    logos/                # partner marks, recoloured to currentColor (see below)
   components/
-    Carousel.astro        # scroll-snap carousel + arrow buttons
-    ContactForm.astro     # email capture (currently inert — see below)
+    Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
+    ContactForm.astro     # name / email / company / message (currently inert — see below)
     Footer.astro          # accent-blue footer with grain overlay
-    LogoWall.astro        # "Our team has worked with" — inlined, single-colour logos
+    SectionHeading.astro  # the one heading treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
-  data/partners.ts        # logo wall entries (name + raw SVG + optical height)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
   styles/global.css       # Tailwind import, @theme tokens, grain overlay
@@ -56,7 +54,7 @@ That gives the accent a job, and the job comes with a rule: **the blue only ever
 something real.** It appears on the footer that closes the page, and on focus rings and
 text selection — places where it signals *this responds to you*. It is never decoration.
 
-The "Notify me" button is filled with `ink` rather than the accent. That is the
+The contact form's "Send" button is filled with `ink` rather than the accent. That is the
 grayscale-default rule applied to the most important control on the page: it earns
 attention through weight, not hue, and the blue stays on the plane behind it and the focus
 ring around it.
@@ -75,8 +73,8 @@ Two practical consequences:
 
 ### The CTA is ink
 
-The "Notify me" button is `bg-ink text-white hover:bg-ink-hover`. White on ink is 14.16:1,
-and the fill is 12.09:1 against the `#ededed` field pill, so both the label and the
+The "Send" button is `bg-ink text-white hover:bg-ink-hover`. White on ink is 14.16:1,
+and the fill is 12.09:1 against the `#ededed` field background, so both the label and the
 control's own edge are far clear of AA. A neutral button is the grayscale-default rule
 applied to the most important control on the page — it earns attention through weight
 rather than hue, which leaves the blue free to mean *this responds to you*.
@@ -84,32 +82,53 @@ rather than hue, which leaves the blue free to mean *this responds to you*.
 Because of that, `--color-accent-hover` has no use site today. It stays in the palette
 rather than being deleted.
 
-### The logo wall is one colour, not four desaturated ones
+### One heading treatment
 
-`LogoWall.astro` renders the companies the team has worked with. Every mark is bound
-to `currentColor` in its SVG file, so the row idles at `nav` and warms to `ink` on
-hover — the same idle/active pair the sidebar nav uses.
+Every heading renders through `SectionHeading.astro` in the display face — Gabarito with
+`ss01`, the H1's own treatment — so the page reads as one typographic voice and size alone
+establishes the hierarchy:
 
-The obvious alternative, keeping the brand palettes and applying `filter: grayscale(1)`,
-was built first and does not work. CSS `grayscale()` preserves each mark's own
-luminance, and these four are nowhere near each other: AstraZeneca's plum computes to
-roughly 35/255, ABB's red to 55, while Universal Robots' light blue lands at 150. On one
-row that reads as four different weights, with the UR mark almost gone. Flattening
-everything to a single ink is the only treatment that makes the row look deliberate.
+| Level                       | Size                    | Face                    |
+| --------------------------- | ----------------------- | ----------------------- |
+| H1                          | `clamp(28px,5vw,32px)`  | Gabarito `ss01`, 500    |
+| Heading (`h2`, `h3`)        | 20px                    | Gabarito `ss01`, 500    |
+| Body                        | 14px                    | Inter, 460              |
+| Form label                  | 12px                    | Instrument Sans, 500    |
 
-Two consequences worth knowing:
+20px was picked by measuring, not by ratio arithmetic. At 18px the heading reads as a
+bolded first line of the paragraph beneath it rather than as a heading; 20px separates
+cleanly and lands the h2/h1 ratio at 0.63, alongside the 0.65 of the reference page this
+layout follows.
 
-- **IKEA is the one multi-colour mark**, and it can't be flattened wholesale — box,
-  oval and letters would collapse into a solid rectangle. Its box and letters take
-  `currentColor` and its oval is filled with `var(--color-page)`, which preserves the
-  knockout. Change the page background and that oval must follow.
-- **The heading is `ink`, not `nav`.** `nav` on `page` is only 3.59:1, under AA for
-  text. The logos may sit there — WCAG exempts logotypes from contrast minimums, and
-  each carries an `sr-only` name — but the label above them may not.
+`as="h3"` drops the level without changing the look, for a heading nested inside another
+section, so the outline can stay honest while the page keeps one heading treatment. Nothing
+uses it today — the page is one H1 and three h2s.
 
-The logos are sized individually rather than to a common height: a filled box and a
-square symbol read much heavier than a wordmark at the same height. The per-logo
-`height` in `src/data/partners.ts` is optical, so re-tune it by eye, not by arithmetic.
+Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
+heading with different wording reads as the wrong destination. The section `id`s are a
+separate contract with the scroll-spy and deliberately do not track the copy: `#starting`
+still points at the section now headed "What changed".
+
+### `nav` is not for words
+
+`#808080` on the page background is 3.59:1 — under AA. It is fine for the idle sidebar
+links, which darken to `ink` on hover and focus. It is not fine for anything a visitor has
+to read, and that includes small qualifiers: the contact form's "(optional)" is separated
+from its label by weight, not by dropping to `nav`.
+
+### Naming companies is a claim
+
+The Applications copy says the team **has worked with** IKEA, ABB, AstraZeneca and
+Universal Robots — never "our customers", "trusted by", or anything else that reads as a
+client list. These are the people's previous engagements, not Ambotics accounts,
+and that distinction has to survive every rewrite of the paragraph.
+
+A logo wall carrying the same four marks was built and then removed (PR #2). The finding
+worth keeping, if one ever comes back: bind the marks to `currentColor` and tint the row as
+one. Keeping the brand palettes and applying `filter: grayscale(1)` was built first and does
+not work — `grayscale()` preserves each mark's own luminance, and these four are nowhere
+near each other (AstraZeneca's plum ~35/255, ABB's red 55, Universal Robots' light blue
+150), so the row reads as four different weights. The SVGs are in git history.
 
 ### Why the palette stays at three colors
 
@@ -185,5 +204,6 @@ To serve from `ambotics.github.io/landing-page` instead, delete `public/CNAME` a
 
 ## Notes
 
-- The email form has no backend — submitting is prevented, matching the original page.
+- The contact form (name, email, company, and an optional message) has no backend —
+  submitting is prevented, matching the original page.
   Point the `<form>` at a handler (Formspree, Buttondown, a Worker) to make it live.

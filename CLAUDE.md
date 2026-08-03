@@ -34,11 +34,15 @@ Contrast floors, already verified: white on `#185de4` is 5.64:1; secondary copy 
 not go below `text-white/85` (4.53:1); the accent on `#f4f4f4` is 5.13:1. All AA.
 
 **The CTA is `ink`, not the accent.** `bg-ink text-white hover:bg-ink-hover` — white on ink
-is 14.16:1 and the fill is 12.09:1 against the `field` pill, so both the label and the
-control's own edge clear AA with room to spare. This follows the grayscale-default rule
+is 14.16:1 and the fill is 12.09:1 against the `field` background, so both the label and
+the control's own edge clear AA with room to spare. This follows the grayscale-default rule
 rather than breaking it: the button is the one thing a visitor can act on, and it earns
 attention through weight, not hue. `--color-accent-hover` is consequently unused today;
 leave it in place rather than deleting a documented token.
+
+The accent still owns the response states on the contact form: every field takes
+`focus:ring-accent/35`, which is the blue doing its one job — marking the control that is
+answering you.
 
 **Settled: there is no fourth color, and adding one is harder than it looks.** A yellow
 accent was tried on this palette and removed. Keep the measurements so nobody re-derives
@@ -58,22 +62,40 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
-**The logo wall is a single colour.** Partner marks in `src/assets/logos/` have had their
-brand fills rewritten to `currentColor` — the geometry is untouched, the colour is not.
-`LogoWall.astro` then tints the whole row `nav`, warming to `ink` on hover. Do not "restore"
-the brand colours and reach for `filter: grayscale(1)` instead: that was built first and
-fails, because `grayscale()` keeps each mark's own luminance and these four span 35–150
-out of 255, so the row reads as four different weights. Details in `README.md`.
+**Every heading goes through `SectionHeading.astro`.** The display face (Gabarito + `ss01`)
+carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
+body. Don't hand-roll a size or reach for `font-body` on a heading; add the class to the
+component so the scale stays in one file. `as="h3"` is there for a heading nested inside
+another section — the level changes, the treatment does not. Nothing uses it today; the page
+is one H1 and three h2s.
+
+`font-ui` at 12px is now the *form label* style, not a heading style. It labels controls,
+which is a different job from titling a section.
+
+Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
+heading worded differently reads as the wrong destination. Change one, change the other.
+The `id`s are a separate contract with the scroll-spy and do not follow the copy (`starting`
+still points at the "What changed" section).
+
+**Anything that is real text must clear AA on the page, including qualifiers.** `nav`
+(`#808080`) is 3.59:1 on `page`, so it is only ever for the idle nav links, which darken to
+`ink` on hover and focus. The form's "(optional)" is set apart by weight rather than by
+dropping to `nav`, for exactly this reason.
+
+**Naming IKEA, ABB, AstraZeneca or Universal Robots is a claim, so the wording is
+load-bearing.** The Applications copy says the team *has worked with* them — never "our customers",
+"trusted by", or anything that reads as a client list. These are the people's
+previous engagements, not Ambotics accounts, and the distinction has to survive every
+rewrite of that paragraph.
+
+A logo wall carrying the same four marks was built and then removed (PR #2). If one comes
+back, the reasoning that took the longest to recover is in git: the marks were bound to
+`currentColor` and tinted as one row, because `filter: grayscale(1)` preserves each mark's
+own luminance — these four span 35–150 out of 255 — so a desaturated row reads as four
+different weights.
 
 ## Gotchas
 
-- **The IKEA logo's oval is `var(--color-page)`, not white.** It is the only multi-colour
-  mark on the wall; its box and letters are `currentColor`, and the oval has to be an
-  actual fill or the letters vanish into the box. It tracks the page background by hand —
-  change `--color-page` and you must change `src/assets/logos/ikea.svg` with it.
-- **Logo sizing is optical, not uniform.** The per-logo `height` in `src/data/partners.ts`
-  is tuned by eye: a filled box (IKEA) and a square symbol (Universal Robots) read far
-  heavier than a wordmark at the same height. Don't normalise them to one number.
 - **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
   `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
   utility only because it scans the file and finds the bare string — rename the token or
