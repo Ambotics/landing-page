@@ -28,9 +28,18 @@ const controlClass =
      with a 64px-spaced subsection ("Where to start"), so at mt-16 the form read
      as one more block inside it rather than as the next section. -->
 <section id="contact" class="mt-24 max-w-content">
-  <SectionHeading class="mb-5">Get in touch</SectionHeading>
+  <SectionHeading>Get in touch</SectionHeading>
 
-  <form data-notify>
+  <!-- mt-5 under the heading and mt-8 down to the form: the same heading-to-copy
+       gap every other section uses, then a slightly wider one before the
+       controls. -->
+  <p class="mt-5 body-copy text-[14px] leading-[1.4] tracking-[-0.02em]">
+    A few lines is enough to start: what the task is, how often it runs, and where it
+    happens. The message is optional — if you would rather just leave your details,
+    that works too.
+  </p>
+
+  <form class="mt-8" data-notify>
     <div class="grid gap-4 sm:grid-cols-2">
       {
         fields.map(({ id, label, type, autocomplete, wide }) => (
