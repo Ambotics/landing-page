@@ -1,9 +1,12 @@
 ---
 // Logo wall — companies the team has worked with on robotics.
 //
-// The heading says "Our team has worked with", not "our customers": these are the
-// people's prior engagements, not Ambotics accounts, and the wall must not be
-// readable as a client list.
+// It closes the Applications section: the carousel shows the kinds of work, and
+// the marks underneath say where the people doing it have already done it.
+//
+// The heading says "With experience from", not "our customers": these are the
+// people's prior engagements, not Ambotics accounts, and a bare logo strip reads
+// as a client list unless the wording rules it out.
 //
 // Colour: every logo is bound to `currentColor`, so the wall idles at `nav` and
 // warms to `ink` — the same idle/active pair the sidebar links use. That is the
@@ -11,16 +14,20 @@
 // brand colours instead does NOT work: CSS grayscale() preserves each mark's own
 // luminance, which put AstraZeneca's near-black plum and Universal Robots' light
 // blue four stops apart on the same row. See "Design system" in README.md.
+import SectionHeading from './SectionHeading.astro';
 import { partners } from '../data/partners';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
 ---
 
-<section id="experience" class="mt-24 max-w-content">
-  <!-- `ink`, not `nav`: nav on page is 3.59:1, which is under AA for real text.
-       The logos may sit at nav — WCAG exempts logotypes from contrast — but this
-       label may not. -->
-  <h2 class="font-ui text-[12px] font-medium uppercase tracking-[0.08em] text-ink">
-    Our team has worked with
-  </h2>
+<section id="experience" class:list={['max-w-content', className]}>
+  <!-- h3, not h2: this sits inside the Applications section, and the outline
+       should say so even though the treatment is identical. -->
+  <SectionHeading as="h3">With experience from</SectionHeading>
 
   <ul class="mt-7 flex flex-wrap items-center gap-x-12 gap-y-8 text-nav">
     {

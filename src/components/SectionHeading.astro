@@ -13,18 +13,22 @@
 //
 // Grayscale by default, like everything that is not a response state — a heading
 // announces, it does not do anything. See "Design system" in README.md.
+// `as` changes the level without changing the look. A heading nested inside
+// another section — the logo wall inside Applications — is an h3 so the outline
+// stays honest, but it is the same 20px display face as its parent heading.
 interface Props {
+  as?: 'h2' | 'h3';
   class?: string;
 }
 
-const { class: className = '' } = Astro.props;
+const { as: Tag = 'h2', class: className = '' }: Props = Astro.props;
 ---
 
-<h2
+<Tag
   class:list={[
     'font-display ss01 text-[20px] font-medium leading-[1.2] tracking-[-0.02em] text-ink',
     className,
   ]}
 >
   <slot />
-</h2>
+</Tag>

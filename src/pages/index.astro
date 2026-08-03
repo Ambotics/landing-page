@@ -74,9 +74,27 @@ import Footer from '../components/Footer.astro';
               </div>
             </section>
 
-            <LogoWall />
+            <!-- The section is deliberately not `max-w-content`: the carousel
+                 bleeds to the right page edge with a negative margin, so the
+                 width cap goes on the prose and the logo wall individually. -->
+            <section id="applications" class="mt-24">
+              <SectionHeading>Applications</SectionHeading>
 
-            <Carousel />
+              <div
+                class="mt-5 max-w-content body-copy text-[14px] leading-[1.4] tracking-[-0.02em]"
+              >
+                <p>
+                  None of this is theoretical for us. Our team's prior work spans IKEA,
+                  ABB, AstraZeneca, and Universal Robots — retail distribution,
+                  industrial robotics, and pharmaceutical production. The applications
+                  below are the kinds of operation we already know from the inside.
+                </p>
+              </div>
+
+              <Carousel class="mt-10" />
+
+              <LogoWall class="mt-16" />
+            </section>
 
             <section class="mt-24 max-w-content">
               <SectionHeading>Where to start</SectionHeading>

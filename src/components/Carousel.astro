@@ -1,76 +1,80 @@
 ---
 import { Image } from 'astro:assets';
-import SectionHeading from './SectionHeading.astro';
 import { applications } from '../data/applications';
+
+// The track only. `#applications`, its heading and its copy live in index.astro,
+// because the section also carries the logo wall underneath this.
+//
+// `relative` must stay on this element rather than move up to the enclosing
+// <section>: the arrows are centred with `top-1/2`, and against the section they
+// would centre on heading-plus-copy-plus-track and ride low. This element is
+// still full content width — the bleed is a negative margin on #carousel itself
+// — so the buttons' left/right offsets are unaffected.
+interface Props {
+  class?: string;
+}
+
+const { class: className = '' } = Astro.props;
 ---
 
-<section id="applications" class="mt-24">
-  <SectionHeading>Applications</SectionHeading>
-
-  <!-- `relative` sits on this wrapper rather than the <section>: the arrows are
-       centred with `top-1/2`, and against the section they would centre on the
-       heading plus the track and ride low. The wrapper is still full content
-       width — the bleed is a negative margin on #carousel itself — so the
-       buttons' left/right offsets are unchanged. -->
-  <div class="group/carousel relative mt-5">
-    <div
-      id="carousel"
-      class="carousel flex gap-[10px] overflow-x-auto -mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]"
-    >
-      {
-        applications.map(({ label, image }) => (
-          <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
-            <Image
-              src={image}
-              alt={label}
-              widths={[583, 1166]}
-              sizes="(max-width: 640px) 80vw, 583px"
-              loading="lazy"
-              class="absolute inset-0 h-full w-full object-cover"
-            />
-            <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">
-              {label}
-            </figcaption>
-          </figure>
-        ))
-      }
-    </div>
-
-    <button
-      type="button"
-      data-dir="-1"
-      aria-label="Previous"
-      aria-controls="carousel"
-      class="absolute left-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-    >
-      <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <path
-          d="M22.5 12.5 15 20l7.5 7.5"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"></path>
-      </svg>
-    </button>
-
-    <button
-      type="button"
-      data-dir="1"
-      aria-label="Next"
-      aria-controls="carousel"
-      class="absolute right-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-    >
-      <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-        <path
-          d="M17.5 12.5 25 20l-7.5 7.5"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"></path>
-      </svg>
-    </button>
+<div class:list={['group/carousel relative', className]}>
+  <div
+    id="carousel"
+    class="carousel flex gap-[10px] overflow-x-auto -mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]"
+  >
+    {
+      applications.map(({ label, image }) => (
+        <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">
+          <Image
+            src={image}
+            alt={label}
+            widths={[583, 1166]}
+            sizes="(max-width: 640px) 80vw, 583px"
+            loading="lazy"
+            class="absolute inset-0 h-full w-full object-cover"
+          />
+          <figcaption class="absolute inset-0 grid place-items-center font-ui text-[16px] font-semibold tracking-[-0.02em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.35)]">
+            {label}
+          </figcaption>
+        </figure>
+      ))
+    }
   </div>
-</section>
+
+  <button
+    type="button"
+    data-dir="-1"
+    aria-label="Previous"
+    aria-controls="carousel"
+    class="absolute left-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+  >
+    <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <path
+        d="M22.5 12.5 15 20l7.5 7.5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    data-dir="1"
+    aria-label="Next"
+    aria-controls="carousel"
+    class="absolute right-3 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-black/30 text-white backdrop-blur-sm opacity-0 transition-opacity duration-200 group-hover/carousel:opacity-100 hover:bg-black/45 focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+  >
+    <svg width="20" height="20" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <path
+        d="M17.5 12.5 25 20l-7.5 7.5"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </button>
+</div>
 
 <script>
   // Carousel arrows — scroll by one card width.

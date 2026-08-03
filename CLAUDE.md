@@ -34,11 +34,15 @@ Contrast floors, already verified: white on `#185de4` is 5.64:1; secondary copy 
 not go below `text-white/85` (4.53:1); the accent on `#f4f4f4` is 5.13:1. All AA.
 
 **The CTA is `ink`, not the accent.** `bg-ink text-white hover:bg-ink-hover` — white on ink
-is 14.16:1 and the fill is 12.09:1 against the `field` pill, so both the label and the
-control's own edge clear AA with room to spare. This follows the grayscale-default rule
+is 14.16:1 and the fill is 12.09:1 against the `field` background, so both the label and
+the control's own edge clear AA with room to spare. This follows the grayscale-default rule
 rather than breaking it: the button is the one thing a visitor can act on, and it earns
 attention through weight, not hue. `--color-accent-hover` is consequently unused today;
 leave it in place rather than deleting a documented token.
+
+The accent still owns the response states on the contact form: every field takes
+`focus:ring-accent/35`, which is the blue doing its one job — marking the control that is
+answering you.
 
 **Settled: there is no fourth color, and adding one is harder than it looks.** A yellow
 accent was tried on this palette and removed. Keep the measurements so nobody re-derives
@@ -58,19 +62,24 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
-**Section headings go through `SectionHeading.astro`, and there are only two heading
-looks.** The display face (Gabarito + `ss01`) carries the H1 *and* every section heading —
-20px against the H1's 28–32px and the 14px body. Don't hand-roll a third size or reach for
-`font-body` on a heading; add the class to the component so the scale stays in one file.
-The one exception is deliberate: the logo wall's "Our team has worked with" is a 12px
-uppercase `font-ui` eyebrow, because it labels a row of marks rather than titling a
-section, and promoting it to the display face makes it compete with the real headings
-around it.
+**Every heading goes through `SectionHeading.astro`.** The display face (Gabarito + `ss01`)
+carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
+body. Don't hand-roll a size or reach for `font-body` on a heading; add the class to the
+component so the scale stays in one file. Use `as="h3"` for a heading nested inside another
+section (the logo wall inside Applications): the level changes, the treatment does not.
+
+`font-ui` at 12px is now the *form label* style, not a heading style. It labels controls,
+which is a different job from titling a section.
 
 Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
 heading worded differently reads as the wrong destination. Change one, change the other.
 The `id`s are a separate contract with the scroll-spy and do not follow the copy (`starting`
 still points at the "What changed" section).
+
+**Anything that is real text must clear AA on the page, including qualifiers.** `nav`
+(`#808080`) is 3.59:1 on `page` and so is only ever for the idle nav links and the logo
+marks — WCAG exempts logotypes, not words. The form's "(optional)" is set apart by weight
+rather than by dropping to `nav`, for exactly this reason.
 
 **The logo wall is a single colour.** Partner marks in `src/assets/logos/` have had their
 brand fills rewritten to `currentColor` — the geometry is untouched, the colour is not.
@@ -78,6 +87,11 @@ brand fills rewritten to `currentColor` — the geometry is untouched, the colou
 the brand colours and reach for `filter: grayscale(1)` instead: that was built first and
 fails, because `grayscale()` keeps each mark's own luminance and these four span 35–150
 out of 255, so the row reads as four different weights. Details in `README.md`.
+
+**The logo wall's heading is a claim, so the wording is load-bearing.** "With experience
+from" — never "our customers" or "trusted by". These are the team's prior engagements, not
+Ambotics accounts, and a bare logo strip reads as a client list unless the words rule it
+out. The same care applies to the Applications copy that names the companies.
 
 ## Gotchas
 
