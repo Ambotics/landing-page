@@ -24,7 +24,10 @@ const controlClass =
   'mt-2 w-full rounded-xl bg-field px-4 py-3 font-sat text-[15px] tracking-[-0.01em] text-ink outline-none transition-shadow focus:ring-2 focus:ring-accent/35';
 ---
 
-<section id="contact" class="mt-16 max-w-content">
+<!-- mt-24, matching the gap between top-level sections. Applications now ends
+     with a 64px-spaced subsection ("Where to start"), so at mt-16 the form read
+     as one more block inside it rather than as the next section. -->
+<section id="contact" class="mt-24 max-w-content">
   <SectionHeading class="mb-5">Get in touch</SectionHeading>
 
   <form data-notify>

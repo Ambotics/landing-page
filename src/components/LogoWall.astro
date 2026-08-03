@@ -29,7 +29,17 @@ const { class: className = '' } = Astro.props;
        should say so even though the treatment is identical. -->
   <SectionHeading as="h3">With experience from</SectionHeading>
 
-  <ul class="mt-7 flex flex-wrap items-center gap-x-12 gap-y-8 text-nav">
+  <!-- `justify-between` spans the row across the container so its edges line up
+       with the copy above it, instead of the marks bunching at the left.
+
+       `gap-x-12` stays because it is the wrap floor, not the spacing: with these
+       four marks (288px of logo in total) the row holds one line down to a 432px
+       container and then breaks, which is the same point it broke at before —
+       justify-between changes how each row distributes, never how many rows
+       there are. Below ~356px it settles into a flush 2×2. -->
+  <ul
+    class="mt-7 flex flex-wrap items-center justify-between gap-x-12 gap-y-8 text-nav"
+  >
     {
       partners.map(({ name, svg, height }) => (
         <li class="logo transition-colors duration-300 hover:text-ink" style={`height:${height}px`}>
