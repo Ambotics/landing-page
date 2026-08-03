@@ -83,8 +83,8 @@ still points at the "What changed" section).
 dropping to `nav`, for exactly this reason.
 
 **Naming IKEA, ABB, AstraZeneca or Universal Robots is a claim, so the wording is
-load-bearing.** The Applications copy says the team's *prior work spans* them — never "our
-customers", "trusted by", or anything that reads as a client list. These are the people's
+load-bearing.** The Applications copy says the team *has worked with* them — never "our customers",
+"trusted by", or anything that reads as a client list. These are the people's
 previous engagements, not Ambotics accounts, and the distinction has to survive every
 rewrite of that paragraph.
 

@@ -118,9 +118,9 @@ from its label by weight, not by dropping to `nav`.
 
 ### Naming companies is a claim
 
-The Applications copy names IKEA, ABB, AstraZeneca and Universal Robots as places the
-team's **prior work spans** — never "our customers", "trusted by", or anything else that
-reads as a client list. These are the people's previous engagements, not Ambotics accounts,
+The Applications copy says the team **has worked with** IKEA, ABB, AstraZeneca and
+Universal Robots — never "our customers", "trusted by", or anything else that reads as a
+client list. These are the people's previous engagements, not Ambotics accounts,
 and that distinction has to survive every rewrite of the paragraph.
 
 A logo wall carrying the same four marks was built and then removed (PR #2). The finding
