@@ -26,17 +26,14 @@ public/
   og-image.png            # favicon + social card (needs an absolute URL, so it stays here)
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
-    logos/                # partner marks, recoloured to currentColor (see below)
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
     ContactForm.astro     # name / email / company / message (currently inert — see below)
     Footer.astro          # accent-blue footer with grain overlay
-    LogoWall.astro        # "With experience from" — inlined, single-colour logos
     SectionHeading.astro  # the one heading treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
-  data/partners.ts        # logo wall entries (name + raw SVG + optical height)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
   styles/global.css       # Tailwind import, @theme tokens, grain overlay
@@ -104,8 +101,8 @@ cleanly and lands the h2/h1 ratio at 0.63, alongside the 0.65 of the reference p
 layout follows.
 
 `as="h3"` drops the level without changing the look, for a heading nested inside another
-section — the logo wall's "With experience from" inside Applications. The outline stays
-honest while the page keeps one heading treatment.
+section, so the outline can stay honest while the page keeps one heading treatment. Nothing
+uses it today — the page is one H1 and three h2s.
 
 Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
 heading with different wording reads as the wrong destination. The section `id`s are a
@@ -115,41 +112,23 @@ still points at the section now headed "What changed".
 ### `nav` is not for words
 
 `#808080` on the page background is 3.59:1 — under AA. It is fine for the idle sidebar
-links (which darken to `ink` on hover and focus) and for the logo marks, since WCAG exempts
-logotypes from contrast minimums and each mark carries an `sr-only` name. It is not fine
-for anything a visitor has to read, and that includes small qualifiers: the contact form's
-"(optional)" is separated from its label by weight, not by dropping to `nav`.
+links, which darken to `ink` on hover and focus. It is not fine for anything a visitor has
+to read, and that includes small qualifiers: the contact form's "(optional)" is separated
+from its label by weight, not by dropping to `nav`.
 
-### The logo wall is one colour, not four desaturated ones
+### Naming companies is a claim
 
-`LogoWall.astro` sits inside the Applications section, under the carousel: the carousel
-shows the kinds of work, and the marks underneath say where the people doing it have done
-it before, closing the section. Every mark is bound
-to `currentColor` in its SVG file, so the row idles at `nav` and warms to `ink` on
-hover — the same idle/active pair the sidebar nav uses.
+The Applications copy names IKEA, ABB, AstraZeneca and Universal Robots as places the
+team's **prior work spans** — never "our customers", "trusted by", or anything else that
+reads as a client list. These are the people's previous engagements, not Ambotics accounts,
+and that distinction has to survive every rewrite of the paragraph.
 
-The obvious alternative, keeping the brand palettes and applying `filter: grayscale(1)`,
-was built first and does not work. CSS `grayscale()` preserves each mark's own
-luminance, and these four are nowhere near each other: AstraZeneca's plum computes to
-roughly 35/255, ABB's red to 55, while Universal Robots' light blue lands at 150. On one
-row that reads as four different weights, with the UR mark almost gone. Flattening
-everything to a single ink is the only treatment that makes the row look deliberate.
-
-Two consequences worth knowing:
-
-- **IKEA is the one multi-colour mark**, and it can't be flattened wholesale — box,
-  oval and letters would collapse into a solid rectangle. Its box and letters take
-  `currentColor` and its oval is filled with `var(--color-page)`, which preserves the
-  knockout. Change the page background and that oval must follow.
-- **The heading is `ink`, not `nav`,** and its wording is load-bearing: "With experience
-  from", never "our customers" or "trusted by". These are prior engagements, not Ambotics
-  accounts, and a bare logo strip reads as a client list unless the words rule it out.
-  The logos themselves may sit at `nav` — WCAG exempts logotypes from contrast minimums,
-  and each carries an `sr-only` name — but no word on the page may.
-
-The logos are sized individually rather than to a common height: a filled box and a
-square symbol read much heavier than a wordmark at the same height. The per-logo
-`height` in `src/data/partners.ts` is optical, so re-tune it by eye, not by arithmetic.
+A logo wall carrying the same four marks was built and then removed (PR #2). The finding
+worth keeping, if one ever comes back: bind the marks to `currentColor` and tint the row as
+one. Keeping the brand palettes and applying `filter: grayscale(1)` was built first and does
+not work — `grayscale()` preserves each mark's own luminance, and these four are nowhere
+near each other (AstraZeneca's plum ~35/255, ABB's red 55, Universal Robots' light blue
+150), so the row reads as four different weights. The SVGs are in git history.
 
 ### Why the palette stays at three colors
 
