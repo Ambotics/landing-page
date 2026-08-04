@@ -1,6 +1,17 @@
 ---
-// No backend yet — the form is inert, exactly as in the original page.
-// Point `action` at a form handler (Formspree, Buttondown, a Worker, …) to make it live.
+// Submissions go to Web3Forms, which relays them to the address registered on
+// that account. That address deliberately appears nowhere in this repo or in the
+// built page — there is nothing for an address harvester to scrape, which is why
+// this replaced an earlier `mailto:` version that had to obfuscate it.
+//
+// `access_key` is public by design: it identifies the form, it is not a secret,
+// and it is in the page source on every Web3Forms integration. What it does allow
+// is anyone who reads it POSTing to the same form, so the spam defences below
+// (honeypot, plus domain restriction in the dashboard) are load-bearing.
+//
+// `action`/`method` are real rather than JS-only, so the form still submits if
+// the script fails — Web3Forms answers a plain POST with its own confirmation
+// page. The script below intercepts that to keep the visitor on this page.
 //
 // Labels are visible rather than `sr-only` placeholders. A four-field form loses
 // its placeholder text the moment someone types, and "which box was the company
@@ -11,6 +22,8 @@
 // is real text and so cannot sit at nav's 3.59:1 on the page. It is set apart by
 // weight instead of colour. Same rule as the logo wall's heading.
 import SectionHeading from './SectionHeading.astro';
+
+const ACCESS_KEY = 'bb4e437c-51d9-4ba4-a228-bcdd4303058f';
 
 const fields = [
   { id: 'name', label: 'Name', type: 'text', autocomplete: 'name', wide: false },
@@ -30,7 +43,15 @@ const controlClass =
 <section id="contact" class="mt-24 max-w-content">
   <SectionHeading class="mb-5">Get in touch</SectionHeading>
 
-  <form data-notify>
+  <form data-notify action="https://api.web3forms.com/submit" method="POST">
+    <input type="hidden" name="access_key" value={ACCESS_KEY} />
+
+    <!-- Web3Forms rejects the submission if this is filled, which only a bot
+         does. `hidden` rather than off-screen positioning: a visually hidden but
+         focusable field is reachable by keyboard and by screen readers, and a
+         visitor who tabs into it fails their own submission. -->
+    <input type="checkbox" name="botcheck" hidden tabindex="-1" autocomplete="off" />
+
     <div class="grid gap-4 sm:grid-cols-2">
       {
         fields.map(({ id, label, type, autocomplete, wide }) => (
@@ -61,16 +82,69 @@ const controlClass =
 
     <button
       type="submit"
-      class="mt-5 rounded-full bg-ink px-5 py-[10px] font-sat text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-[background-color,transform] hover:bg-ink-hover active:scale-[0.98]"
+      data-submit
+      class="mt-5 rounded-full bg-ink px-5 py-[10px] font-sat text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-[background-color,transform] hover:bg-ink-hover active:scale-[0.98] disabled:cursor-default disabled:opacity-60 disabled:hover:bg-ink"
     >
       Send
     </button>
+
+    <!-- The outcome is carried by the words, not by colour: the palette is three
+         colours and a red error state would be a fourth. `ink`, not `muted` —
+         real text, and muted is 2.1:1 on the page.
+
+         aria-live so the change is announced; it is in the DOM from the start,
+         empty, because a live region inserted at the same moment as its text is
+         not reliably announced. -->
+    <p
+      data-status
+      aria-live="polite"
+      class="mt-4 max-w-content font-sat text-[13px] leading-[1.45] tracking-[-0.01em] text-ink empty:mt-0"
+    >
+    </p>
   </form>
 </section>
 
 <script>
-  document.querySelector<HTMLFormElement>('form[data-notify]')?.addEventListener(
-    'submit',
-    (event) => event.preventDefault()
-  );
+  const form = document.querySelector<HTMLFormElement>('form[data-notify]');
+  const button = form?.querySelector<HTMLButtonElement>('[data-submit]');
+  const status = form?.querySelector<HTMLParagraphElement>('[data-status]');
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const data = new FormData(form);
+    // Gives the inbox a readable subject line instead of the default. The
+    // access_key rides along from its hidden input, so it is not appended here.
+    data.set('subject', `Enquiry from ${data.get('name')}, ${data.get('company')}`);
+
+    const label = button?.textContent ?? 'Send';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Sending…';
+    }
+    if (status) status.textContent = '';
+
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: data,
+      });
+      // Web3Forms answers 200 with `success: false` for a rejected submission
+      // (bad key, honeypot tripped), so the status code alone is not the answer.
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message);
+
+      form.reset();
+      if (status) status.textContent = "Thanks — that's with us. We'll come back to you.";
+    } catch {
+      if (status)
+        status.textContent =
+          "That didn't send. Please try again — if it keeps failing, something on our end is broken.";
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = label;
+      }
+    }
+  });
 </script>

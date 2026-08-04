@@ -28,7 +28,7 @@ src/
   assets/                 # carousel photos — optimised at build time by astro:assets
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
-    ContactForm.astro     # name / email / company / message (currently inert — see below)
+    ContactForm.astro     # name / email / company / message, posted to Web3Forms
     Footer.astro          # accent-blue footer with grain overlay
     SectionHeading.astro  # the one heading treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
@@ -107,7 +107,7 @@ uses it today — the page is one H1 and three h2s.
 Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
 heading with different wording reads as the wrong destination. The section `id`s are a
 separate contract with the scroll-spy and deliberately do not track the copy: `#starting`
-still points at the section now headed "What changed".
+still points at the section now headed "Robots are changing".
 
 ### `nav` is not for words
 
@@ -204,6 +204,9 @@ To serve from `ambotics.github.io/landing-page` instead, delete `public/CNAME` a
 
 ## Notes
 
-- The contact form (name, email, company, and an optional message) has no backend —
-  submitting is prevented, matching the original page.
-  Point the `<form>` at a handler (Formspree, Buttondown, a Worker) to make it live.
+- The contact form (name, email, company, and an optional message) posts to
+  [Web3Forms](https://web3forms.com), which relays submissions to the address on that
+  account — the site itself stays static, and the destination address never appears in the
+  page. The `<form>` carries a real `action`, so it still works without JavaScript;
+  the script upgrades it to a fetch so the visitor stays on the page, and reports the
+  outcome in the status line below the button.

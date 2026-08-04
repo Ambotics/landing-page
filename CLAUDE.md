@@ -75,7 +75,7 @@ which is a different job from titling a section.
 Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
 heading worded differently reads as the wrong destination. Change one, change the other.
 The `id`s are a separate contract with the scroll-spy and do not follow the copy (`starting`
-still points at the "What changed" section).
+still points at the "Robots are changing" section).
 
 **Anything that is real text must clear AA on the page, including qualifiers.** `nav`
 (`#808080`) is 3.59:1 on `page`, so it is only ever for the idle nav links, which darken to
@@ -108,6 +108,16 @@ different weights.
   `@import 'tailwindcss'` in `global.css`. The pre-Astro page had an `input::placeholder`
   rule that never applied, because the Play CDN injected preflight after the inline
   `<style>` and silently won.
+- **The contact address is not in this repo, and should stay that way.** The form posts to
+  Web3Forms, which relays to whatever address that account is set to; changing the
+  destination is a dashboard change, not a code change. An earlier `mailto:` version had to
+  keep the address in the page under a character-shift obfuscation to hide it from
+  harvesters — the relay removes the problem rather than obscuring it. `grep -rlE
+  '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' dist/` should keep returning nothing.
+  The `access_key` in `ContactForm.astro` is public by design and is not a secret; it is
+  the form's identifier. Spam is held off by the `botcheck` honeypot plus the domain
+  restriction set in the Web3Forms dashboard — if submissions start arriving from
+  elsewhere, that setting is the thing to check first.
 - **`og-image.png` lives in `public/`, not `src/assets/`.** Social crawlers need a stable
   absolute URL, so it must not go through `astro:assets` hashing.
 
