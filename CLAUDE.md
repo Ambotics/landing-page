@@ -96,6 +96,11 @@ different weights.
 
 ## Gotchas
 
+- **`/preview` is the live page with the mark on.** `preview.astro` renders `index.astro`
+  itself; `Layout.astro` and `Wordmark.astro` switch on the mark, the new favicons, the
+  new OG card and `noindex` from `Astro.url.pathname.startsWith('/preview')`. To promote:
+  drop both checks, move `og-image-mark.png` over `og-image.png`, delete `preview.astro`.
+  The designer's navy square (`#202059`) is not used anywhere — it would be a second blue.
 - **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
   `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
   utility only because it scans the file and finds the bare string — rename the token or

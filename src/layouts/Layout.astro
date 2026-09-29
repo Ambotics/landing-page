@@ -8,8 +8,13 @@ interface Props {
 
 const { title, description } = Astro.props;
 
+// /preview carries the new mark before it goes live on /. Promoting it means
+// renaming og-image-mark.png over og-image.png, keeping the preview icon links,
+// and dropping this check along with the one in Wordmark.astro.
+const preview = Astro.url.pathname.startsWith('/preview');
+
 // Absolute URLs — OG/Twitter crawlers do not resolve relative paths.
-const ogImage = new URL('/og-image.png', Astro.site ?? Astro.url).href;
+const ogImage = new URL(preview ? '/og-image-mark.png' : '/og-image.png', Astro.site ?? Astro.url).href;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
 ---
 
@@ -32,7 +37,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
-    <link rel="icon" href="/og-image.png" />
+    {
+      preview ? (
+        <>
+          <meta name="robots" content="noindex" />
+          <link rel="icon" href="/favicon.ico" sizes="32x32" />
+          <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        </>
+      ) : (
+        <link rel="icon" href="/og-image.png" />
+      )
+    }
 
     <!-- Fonts: Gabarito (display), Inter (body), Instrument Sans (UI) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
