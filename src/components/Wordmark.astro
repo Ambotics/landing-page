@@ -9,6 +9,10 @@ interface Props {
 const { href, class: className = '' } = Astro.props;
 const Tag = href ? 'a' : 'span';
 
+// /preview sets the wordmark one step lighter, at 500, for sign-off. To promote
+// it, drop this check and the one in Layout.astro, then delete src/pages/preview.astro.
+const preview = Astro.url.pathname.startsWith('/preview');
+
 // The mark is centred on the cap height, not sat on the baseline. Gabarito's caps
 // (and the b and t ascenders — "Ambotics" has no descenders) are 0.681em tall,
 // measured in the browser. The mark is 0.8em, so it overshoots by 0.119em, and
@@ -18,7 +22,11 @@ const Tag = href ? 'a' : 'span';
 
 <Tag
   href={href}
-  class:list={['font-display ss01 leading-none tracking-[-0.02em]', className]}
+  class:list={[
+    'font-display ss01 leading-none tracking-[-0.02em]',
+    preview ? 'font-medium' : 'font-semibold',
+    className,
+  ]}
 >
   <Mark class="mr-[0.28em] inline-block h-[0.8em] w-auto align-[-0.06em]" />Ambotics
 </Tag>
