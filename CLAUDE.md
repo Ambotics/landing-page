@@ -62,6 +62,13 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
+**The mark takes `currentColor` and never the designer's navy.** The source file is a
+white mark on a `#202059` square; that navy would be a second blue, so it is dropped.
+On the page the mark follows the wordmark (muted in the sidebar, white on the footer);
+off the page — favicon, apple-touch-icon, `og-image.png` — it is white on `#185de4`,
+the footer's own pairing. The lockup has no ™. The mark is centred on Gabarito's
+0.681em cap height (see `Wordmark.astro`); resize it and the offset must be recomputed.
+
 **Every heading goes through `SectionHeading.astro`.** The display face (Gabarito + `ss01`)
 carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
 body. Don't hand-roll a size or reach for `font-body` on a heading; add the class to the
@@ -96,11 +103,6 @@ different weights.
 
 ## Gotchas
 
-- **`/preview` is the live page with the mark on.** `preview.astro` renders `index.astro`
-  itself; `Layout.astro` and `Wordmark.astro` switch on the mark (and drop the ™), the new favicons, the
-  new OG card and `noindex` from `Astro.url.pathname.startsWith('/preview')`. To promote:
-  drop both checks, move `og-image-mark.png` over `og-image.png`, delete `preview.astro`.
-  The designer's navy square (`#202059`) is not used anywhere — it would be a second blue.
 - **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
   `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
   utility only because it scans the file and finds the bare string — rename the token or

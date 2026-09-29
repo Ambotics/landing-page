@@ -23,9 +23,8 @@ npm run dev        # http://localhost:4321
 astro.config.mjs          # site URL + Tailwind Vite plugin
 public/
   CNAME                   # custom domain for GitHub Pages
-  og-image.png            # favicon + social card (needs an absolute URL, so it stays here)
-  og-image-mark.png       # social card with the mark — /preview only until promoted
-  favicon.{svg,ico}, apple-touch-icon.png  # the mark, white on the accent — /preview only
+  og-image.png            # social card: the lockup, white on the accent (needs an absolute URL)
+  favicon.{svg,ico}, apple-touch-icon.png  # the mark, white on the accent
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
   components/
@@ -35,11 +34,10 @@ src/
     Mark.astro            # the "A" mark, currentColor — sits in the wordmark lockup
     SectionHeading.astro  # the one heading treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
-    Wordmark.astro        # "Ambotics™" lockup, shared by header and footer
+    Wordmark.astro        # mark + "Ambotics" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
-  pages/preview.astro     # renders index.astro with the mark switched on (noindex)
   styles/global.css       # Tailwind import, @theme tokens, grain overlay
 .github/workflows/deploy.yml
 ```

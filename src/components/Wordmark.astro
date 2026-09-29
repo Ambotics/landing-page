@@ -9,22 +9,16 @@ interface Props {
 const { href, class: className = '' } = Astro.props;
 const Tag = href ? 'a' : 'span';
 
-// The mark, and the lockup without the ™, are on /preview only until signed off.
-// To promote, drop this check and the matching one in Layout.astro, then delete
-// src/pages/preview.astro.
-const preview = Astro.url.pathname.startsWith('/preview');
+// The mark is centred on the cap height, not sat on the baseline. Gabarito's caps
+// (and the b and t ascenders — "Ambotics" has no descenders) are 0.681em tall,
+// measured in the browser. The mark is 0.8em, so it overshoots by 0.119em, and
+// dropping it 0.06em below the baseline splits that evenly top and bottom. A
+// triangle drawn exactly at cap height reads smaller than the caps beside it.
 ---
 
 <Tag
   href={href}
   class:list={['font-display ss01 leading-none tracking-[-0.02em]', className]}
 >
-  {
-    // Centred on the cap height, not sat on the baseline. Gabarito's caps (and
-    // the b and t ascenders — "Ambotics" has no descenders) are 0.681em tall,
-    // measured in the browser. The mark is 0.8em, so it overshoots by 0.119em,
-    // and dropping it 0.06em below the baseline splits that evenly top and
-    // bottom. A triangle drawn exactly at cap height reads smaller than the caps.
-    preview && <Mark class="mr-[0.28em] inline-block h-[0.8em] w-auto align-[-0.06em]" />
-  }Ambotics{!preview && <sup class="text-[0.42em] align-super tracking-normal">™</sup>}
+  <Mark class="mr-[0.28em] inline-block h-[0.8em] w-auto align-[-0.06em]" />Ambotics
 </Tag>
