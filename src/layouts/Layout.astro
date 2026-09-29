@@ -8,9 +8,6 @@ interface Props {
 
 const { title, description } = Astro.props;
 
-// /preview is for sign-off only; keep it out of search. See Wordmark.astro.
-const preview = Astro.url.pathname.startsWith('/preview');
-
 // Absolute URLs — OG/Twitter crawlers do not resolve relative paths.
 const ogImage = new URL('/og-image.png', Astro.site ?? Astro.url).href;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
@@ -25,7 +22,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? Astro.url).href;
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    {preview && <meta name="robots" content="noindex" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />

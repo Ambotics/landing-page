@@ -69,6 +69,10 @@ off the page — favicon, apple-touch-icon, `og-image.png` — it is white on `#
 the footer's own pairing. The mark is centred on Gabarito's 0.681em cap height (see
 `Wordmark.astro`); resize it and the offset must be recomputed.
 
+**The wordmark is Gabarito 600, set in `Wordmark.astro`, not by its callers.** 500 was
+tried on a preview and rejected: it is every heading's weight, so the sidebar lockup reads
+as a heading beside the H1, and the solid mark outweighs the letters.
+
 **The name carries no ™ anywhere** — not the lockup, the `<title>`, the meta tags, the
 social card or the docs.
 
