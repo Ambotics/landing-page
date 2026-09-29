@@ -1,4 +1,4 @@
-# Ambotics™ — landing page
+# Ambotics — landing page
 
 A recreation of [ambotics.framer.website](https://ambotics.framer.website),
 built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub Pages.

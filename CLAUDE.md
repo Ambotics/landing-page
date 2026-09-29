@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-The Ambotics™ landing page. Astro 7 + Tailwind v4, static output, deployed to GitHub Pages
+The Ambotics landing page. Astro 7 + Tailwind v4, static output, deployed to GitHub Pages
 by `.github/workflows/deploy.yml` on every push to `main`.
 
 ```bash
@@ -66,8 +66,11 @@ Full palette table and rationale: see **Design system** in `README.md`.
 white mark on a `#202059` square; that navy would be a second blue, so it is dropped.
 On the page the mark follows the wordmark (muted in the sidebar, white on the footer);
 off the page — favicon, apple-touch-icon, `og-image.png` — it is white on `#185de4`,
-the footer's own pairing. The lockup has no ™. The mark is centred on Gabarito's
-0.681em cap height (see `Wordmark.astro`); resize it and the offset must be recomputed.
+the footer's own pairing. The mark is centred on Gabarito's 0.681em cap height (see
+`Wordmark.astro`); resize it and the offset must be recomputed.
+
+**The name carries no ™ anywhere** — not the lockup, the `<title>`, the meta tags, the
+social card or the docs.
 
 **Every heading goes through `SectionHeading.astro`.** The display face (Gabarito + `ss01`)
 carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
