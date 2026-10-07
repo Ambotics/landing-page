@@ -62,8 +62,10 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
-**The mark takes `currentColor` and never the designer's navy.** The source file is a
-white mark on a `#202059` square; that navy would be a second blue, so it is dropped.
+**The mark takes `currentColor` and never the designer's navy.** The source file
+(replaced 2026-10-07) is a `#202059` mark on a `#185de4` square; that navy would be a
+second blue, so it is dropped. The favicon re-centres the mark in the square: the designer's
+frame sat it 16px right of centre.
 On the page the mark follows the wordmark (muted in the sidebar, white on the footer);
 off the page — favicon, apple-touch-icon, `og-image.png` — it is white on `#185de4`,
 the footer's own pairing. The mark is centred on Gabarito's 0.681em cap height (see
@@ -73,7 +75,7 @@ the footer's own pairing. The mark is centred on Gabarito's 0.681em cap height (
 until 2026-09-30. 500 is also every heading's weight, so the sidebar lockup sits closer to
 the H1 and the solid mark weighs more against the letters; that was accepted. `og-image.png`
 bakes in the same lockup: white on `#185de4`, Gabarito at 92px, centred in 1200×630. Change
-the weight and re-render the card.
+the weight or the mark and re-render the card.
 
 **The name carries no ™ anywhere** — not the lockup, the `<title>`, the meta tags, the
 social card or the docs.
