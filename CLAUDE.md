@@ -63,7 +63,7 @@ them:
 Full palette table and rationale: see **Design system** in `README.md`.
 
 **The mark takes `currentColor` and never the designer's navy.** The source file
-(replaced 2026-10-07) is a `#202059` mark on a `#185de4` square; that navy would be a
+(replaced 2026-10-09) is a `#185de4` mark on a `#001b30` square; that navy would be a
 second blue, so it is dropped. The favicon re-centres the mark in the square: the designer's
 frame sat it 16px right of centre.
 On the page the mark follows the wordmark (muted in the sidebar, white on the footer);
