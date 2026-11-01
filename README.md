@@ -24,14 +24,14 @@ astro.config.mjs          # site URL + Tailwind Vite plugin
 public/
   CNAME                   # custom domain for GitHub Pages
   og-image.png            # social card: the lockup, white on the accent (needs an absolute URL)
-  favicon.{svg,ico}, apple-touch-icon.png  # the mark, white on the accent
+  favicon.{svg,ico}, apple-touch-icon.png  # the mark: accent A on a white tile
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
     ContactForm.astro     # name / email / company / message, posted to Web3Forms
     Footer.astro          # accent-blue footer with grain overlay
-    Mark.astro            # the "A" mark, currentColor — sits in the wordmark lockup
+    Mark.astro            # the "A" knocked out of a currentColor tile — sits in the wordmark lockup
     SectionHeading.astro  # the one heading treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # mark + "Ambotics" lockup, shared by header and footer

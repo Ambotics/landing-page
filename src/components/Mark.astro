@@ -1,11 +1,12 @@
 ---
-// The Ambotics mark — the "A" cut in two.
+// The Ambotics mark — the "A" cut in two, knocked out of a rounded tile.
 //
-// Drawn from the designer's 391px frame (the mark knocked out of a white rounded
-// square), with the square dropped and the viewBox cropped tight to the mark, so it
-// sits on a text baseline like a glyph. The fill is `currentColor`: the mark takes
-// whatever colour the wordmark beside it has, which keeps it grayscale in the sidebar
-// and white on the footer's blue.
+// Drawn from the designer's 391px frame: a square with 20px corners and the A cut
+// through it, so whatever sits behind the tile shows through the A. The A is moved
+// 17px left and 1.36px up from the frame, which sat it right of centre; it is now
+// centred on its own bounds. The fill is `currentColor`: the tile takes whatever
+// colour the wordmark beside it has, which keeps it grayscale in the sidebar and
+// white on the footer's blue.
 interface Props {
   class?: string;
 }
@@ -13,16 +14,11 @@ interface Props {
 const { class: className = '' } = Astro.props;
 ---
 
-<svg
-  viewBox="67.8 61 289.4 271.7"
-  fill="currentColor"
-  aria-hidden="true"
-  class={className}
->
+<svg viewBox="0 0 391 391" fill="currentColor" aria-hidden="true" class={className}>
   <path
-    d="M105.679 211.136C104.27 211.136 102.966 211.877 102.244 213.087L68.416 269.79C66.8254 272.456 68.7469 275.84 71.8516 275.84H135.956C137.365 275.84 138.67 276.58 139.392 277.79L170.972 330.724C171.693 331.933 172.999 332.674 174.407 332.674H245.825C248.93 332.674 250.852 329.29 249.261 326.624L190.097 227.46C187.148 222.518 182.811 218.395 177.54 215.523C172.269 212.652 166.255 211.136 160.13 211.136H105.679Z"
-  ></path>
-  <path
-    d="M199.316 63.0039C197.765 60.4032 193.998 60.4039 192.446 63.0049L156.736 122.873C155.983 124.135 155.983 125.709 156.736 126.972L278.301 330.724C279.023 331.933 280.328 332.674 281.736 332.674H353.154C356.259 332.674 358.181 329.29 356.59 326.624L199.316 63.0039Z"
+    fill-rule="evenodd"
+    d="M20 0H371A20 20 0 0 1 391 20V371A20 20 0 0 1 371 391H20A20 20 0 0 1 0 371V20A20 20 0 0 1 20 0Z
+       M88.679 209.776C87.27 209.776 85.966 210.517 85.244 211.727L51.416 268.43C49.825 271.096 51.747 274.48 54.852 274.48H118.956C120.365 274.48 121.67 275.22 122.392 276.43L153.972 329.364C154.693 330.573 155.999 331.314 157.407 331.314H228.825C231.93 331.314 233.852 327.93 232.261 325.264L173.097 226.1C170.148 221.158 165.811 217.035 160.54 214.163C155.269 211.292 149.255 209.776 143.13 209.776H88.679Z
+       M182.316 61.644C180.765 59.043 176.998 59.044 175.446 61.645L139.736 121.513C138.983 122.775 138.983 124.349 139.736 125.612L261.301 329.364C262.023 330.573 263.328 331.314 264.736 331.314H336.154C339.259 331.314 341.181 327.93 339.59 325.264L182.316 61.644Z"
   ></path>
 </svg>

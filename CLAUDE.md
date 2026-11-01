@@ -62,20 +62,25 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
-**The mark takes `currentColor`, never the designer's frame colours.** The source file
-(replaced 2026-11-01) is the mark knocked out of a white rounded square; the square is
-dropped. Earlier frames put the mark on a navy square, dropped because navy would be a
-second blue. The favicon re-centres the mark in the square: the designer's frame sat it
-17px right of centre.
-On the page the mark follows the wordmark (muted in the sidebar, white on the footer);
-off the page — favicon, apple-touch-icon, `og-image.png` — it is white on `#185de4`,
-the footer's own pairing. The mark is centred on Gabarito's 0.681em cap height (see
-`Wordmark.astro`); resize it and the offset must be recomputed.
+**The mark is the A knocked out of the designer's rounded tile, and the tile takes
+`currentColor`.** The source file (replaced 2026-11-01) is a white 391px square with 20px
+corners and the A cut through it. The tile came back on 2026-11-01 as an app-icon-style
+badge; NOW-255 had dropped it. Earlier frames put the mark on a navy square, dropped
+because navy would be a second blue. The A is re-centred in the tile: the designer's frame
+sat it 17px right of centre. `Mark.astro` and `favicon.svg` carry the same shifted path.
+On the page the tile follows the wordmark (muted in the sidebar, white on the footer), and
+the A shows whatever is behind it. Off the page — favicon, apple-touch-icon,
+`og-image.png` — the badge is the footer's: a white tile with the A in `#185de4`. The
+favicon paints the A rather than cutting it, so it stays blue on any tab. On a white tab
+the tile itself disappears and only the A shows. `apple-touch-icon.png` is full-bleed
+white with square corners, because iOS cuts its own corners and turns transparency black.
+The tile is 0.9em and centred on Gabarito's 0.681em cap height (see `Wordmark.astro`);
+resize it and the offset must be recomputed.
 
 **The wordmark is Gabarito 500, set in `Wordmark.astro`, not by its callers.** It was 600
 until 2026-09-30. 500 is also every heading's weight, so the sidebar lockup sits closer to
 the H1 and the solid mark weighs more against the letters; that was accepted. `og-image.png`
-bakes in the same lockup: white on `#185de4`, Gabarito at 92px, centred in 1200×630. Change
+bakes in the footer lockup: white on `#185de4`, Gabarito at 92px, centred in 1200×630. Change
 the weight or the mark and re-render the card.
 
 **The name carries no ™ anywhere** — not the lockup, the `<title>`, the meta tags, the
