@@ -11,14 +11,15 @@ const Tag = href ? 'a' : 'span';
 
 // The mark is centred on the cap height, not sat on the baseline. Gabarito's caps
 // (and the b and t ascenders — "Ambotics" has no descenders) are 0.681em tall,
-// measured in the browser. The mark is 0.8em, so it overshoots by 0.119em, and
-// dropping it 0.06em below the baseline splits that evenly top and bottom. A
-// triangle drawn exactly at cap height reads smaller than the caps beside it.
+// measured in the browser. The tile is 0.9em, so it overshoots by 0.219em, and
+// dropping it 0.11em below the baseline splits that evenly top and bottom. At
+// 0.8em the A inside the tile shrank to half the caps; at 1em the tile outweighed
+// the letters.
 ---
 
 <Tag
   href={href}
   class:list={['font-display ss01 font-medium leading-none tracking-[-0.02em]', className]}
 >
-  <Mark class="mr-[0.28em] inline-block h-[0.8em] w-auto align-[-0.06em]" />Ambotics
+  <Mark class="mr-[0.28em] inline-block h-[0.9em] w-auto align-[-0.11em]" />Ambotics
 </Tag>
