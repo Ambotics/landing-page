@@ -62,10 +62,11 @@ them:
 
 Full palette table and rationale: see **Design system** in `README.md`.
 
-**The mark takes `currentColor` and never the designer's navy.** The source file
-(replaced 2026-10-09) is a `#185de4` mark on a `#001b30` square; that navy would be a
-second blue, so it is dropped. The favicon re-centres the mark in the square: the designer's
-frame sat it 16px right of centre.
+**The mark takes `currentColor`, never the designer's frame colours.** The source file
+(replaced 2026-11-01) is the mark knocked out of a white rounded square; the square is
+dropped. Earlier frames put the mark on a navy square, dropped because navy would be a
+second blue. The favicon re-centres the mark in the square: the designer's frame sat it
+17px right of centre.
 On the page the mark follows the wordmark (muted in the sidebar, white on the footer);
 off the page — favicon, apple-touch-icon, `og-image.png` — it is white on `#185de4`,
 the footer's own pairing. The mark is centred on Gabarito's 0.681em cap height (see
