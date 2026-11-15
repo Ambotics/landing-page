@@ -216,8 +216,8 @@ on down the robot to its base. At rest the head turns after the visitor's pointe
   of the way in a fifth of a second. On the way it blends the looks around it; it stops on
   one. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
   robot can take.
-- **924 kB for every visitor, 549 kB more for one with a mouse.** The five pictures are
-  431 kB and the head's lift is 493 kB. The lift's 32 are fetched once the first screen is
+- **909 kB for every visitor, 533 kB more for one with a mouse.** The five pictures are
+  430 kB and the head's lift is 479 kB. The lift's 32 are fetched once the first screen is
   up. The looks come after them, and only once a mouse moves or a wheel turns: a phone
   never fetches them.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
@@ -248,10 +248,11 @@ tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -
 ```
 
 62 is the neck's home tilt: that far up, the head is level, and that is where the five
-pictures have it. `--zoom-look` adds the 170 looks. The five pictures and the lift take
-about 20 min. A look is a small picture and still takes Blender 20 s or more, so the looks
-were rendered apart, a row to a Blender and all ten at once: add `--zoom-only '^look_03_'`
-for row 03 alone. That took 14 min. Then here,
+pictures have it. `--zoom-look` adds the 170 looks. One Blender would take over an hour for
+the 208 pictures: the five and the lift took 20 min, and a look is small and still takes
+20 s or more. `--zoom-only '^look_03_'` renders only the pictures whose name matches, here
+row 03 of the looks, so the work can go to several Blenders at once. Thirteen side by side
+took 24 min: one for the five pictures, two for the lift, ten for the looks. Then here,
 `scripts/hero.sh <out>/hero` moves the tile to the accent, fades each picture's edges,
 encodes it into `src/assets/hero/` and copies `zoom.json`: 3 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
