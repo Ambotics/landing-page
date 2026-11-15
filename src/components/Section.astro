@@ -1,12 +1,16 @@
 ---
-// One section of the page: the heading in the first of three columns, the copy
-// in the other two, and room under both for something wide. Every section goes
-// through this component, so the columns line up down the page and the headings
-// have one treatment.
+// One section of /v2-preview: the heading in the first of three columns, the
+// copy in the other two, and room under both for something wide. Every section
+// goes through this component, so the columns line up down the page and the
+// headings have one treatment.
 //
-// That treatment is the display face (Gabarito with `ss01`), the H1's own, a
-// step down in size. Grayscale, like everything that is not a response state —
-// a heading announces, it does not do anything. See "Design system" in README.md.
+// The section is a grid of its own: the content column between two gutters,
+// which take what is left of the screen. The wide slot starts with the content
+// and runs through the right gutter, to the edge of the screen.
+//
+// The heading is the display face (Gabarito with `ss01`), the H1's own, a step
+// down in size. Grayscale, like everything that is not a response state — a
+// heading announces, it does not do anything. See "Design system" in README.md.
 interface Props {
   id: string;
   heading: string;
@@ -15,8 +19,11 @@ interface Props {
 const { id, heading } = Astro.props;
 ---
 
-<section id={id} class="py-20 sm:py-28">
-  <div class="mx-auto grid max-w-6xl gap-x-10 gap-y-8 px-6 lg:grid-cols-3 lg:px-10">
+<section
+  id={id}
+  class="grid grid-cols-[minmax(1.5rem,1fr)_minmax(0,67rem)_minmax(1.5rem,1fr)] py-20 sm:py-28 lg:grid-cols-[minmax(2.5rem,1fr)_minmax(0,67rem)_minmax(2.5rem,1fr)]"
+>
+  <div class="col-start-2 grid gap-x-10 gap-y-8 lg:grid-cols-3">
     <h2
       class="font-display ss01 text-3xl font-medium tracking-tight text-balance text-ink sm:text-4xl lg:sticky lg:top-10 lg:self-start"
     >
@@ -25,12 +32,12 @@ const { id, heading } = Astro.props;
     <div class="lg:col-span-2">
       <slot />
     </div>
-    {
-      Astro.slots.has('wide') && (
-        <div class="mt-6 min-w-0 lg:col-span-3">
-          <slot name="wide" />
-        </div>
-      )
-    }
   </div>
+  {
+    Astro.slots.has('wide') && (
+      <div class="col-start-2 col-end-4 mt-14 min-w-0">
+        <slot name="wide" />
+      </div>
+    )
+  }
 </section>

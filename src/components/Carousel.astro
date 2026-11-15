@@ -2,16 +2,32 @@
 import { Image } from 'astro:assets';
 import { applications } from '../data/applications';
 
-// The track only. `#applications`, its heading and its copy live in index.astro;
-// the track goes in the section's `wide` slot and fills the page's width.
+// The track only. `#applications`, its heading and its copy live in index.astro,
+// because the section also carries the logo wall underneath this.
 //
 // `relative` must stay on this element rather than move up to the enclosing
 // <section>: the arrows are centred with `top-1/2`, and against the section they
-// would centre on heading-plus-copy-plus-track and ride low.
+// would centre on heading-plus-copy-plus-track and ride low. This element is
+// still full content width — the bleed is a negative margin on #carousel itself
+// — so the buttons' left/right offsets are unaffected.
+//
+// `track` is that bleed: how the track runs out past this element on the right,
+// and the padding that stops the last card short of the edge. The default is
+// /'s, out through the page's own padding. On /v2-preview this element already
+// ends at the screen's edge, so that page passes the padding alone.
+interface Props {
+  class?: string;
+  track?: string;
+}
+
+const {
+  class: className = '',
+  track = '-mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]',
+} = Astro.props;
 ---
 
-<div class="group/carousel relative">
-  <div id="carousel" class="carousel flex gap-[10px] overflow-x-auto rounded-xl">
+<div class:list={['group/carousel relative', className]}>
+  <div id="carousel" class:list={['carousel flex gap-[10px] overflow-x-auto', track]}>
     {
       applications.map(({ label, image }) => (
         <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">

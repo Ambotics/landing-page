@@ -18,11 +18,12 @@
 // one" is a real question on a form this plain; the single-field pill this
 // replaced could get away with it because there was nothing to confuse it with.
 //
-// The labels are `ink`, including the "(optional)" qualifier: it is real text,
-// and a grey light enough to read as secondary does not clear AA on the page
-// (`#808080` is 3.59:1). It is set apart by weight instead of colour.
+// The labels are `ink`, not `nav` — including the "(optional)" qualifier, which
+// is real text and so cannot sit at nav's 3.59:1 on the page. It is set apart by
+// weight instead of colour. Same rule as the logo wall's heading.
 //
-// The form only: `#contact` and its heading live in index.astro.
+// The form only: `#contact` and its heading are the page's, since / and
+// /v2-preview lay a section out differently.
 const ACCESS_KEY = 'bb4e437c-51d9-4ba4-a228-bcdd4303058f';
 
 const fields = [
@@ -83,8 +84,8 @@ const controlClass =
   </button>
 
   <!-- The outcome is carried by the words, not by colour: the palette is three
-       colours and a red error state would be a fourth. `ink`, like all real
-       text on the page.
+       colours and a red error state would be a fourth. `ink`, not `muted` —
+       real text, and muted is 2.1:1 on the page.
 
        aria-live so the change is announced; it is in the DOM from the start,
        empty, because a live region inserted at the same moment as its text is
@@ -92,7 +93,7 @@ const controlClass =
   <p
     data-status
     aria-live="polite"
-    class="mt-4 font-sat text-[13px] leading-[1.45] tracking-[-0.01em] text-ink empty:mt-0"
+    class="mt-4 max-w-content font-sat text-[13px] leading-[1.45] tracking-[-0.01em] text-ink empty:mt-0"
   >
   </p>
 </form>

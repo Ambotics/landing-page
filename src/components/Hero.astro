@@ -1,12 +1,15 @@
 ---
 // The hero: the page opens on the mark, and scrolling zooms out until the mark
-// is the tile on the robot's chest, with the headline over the robot.
+// is the tile on the robot's chest, with the headline over the robot. The head
+// comes into view looking at the visitor, then turns down to the robot's hands.
 //
 // The robot is five pictures from one camera with a zoom lens: the whole robot,
 // then squares about the mark down to its tile. `zoom.json` says where each lies,
 // in mm on the mark's plane from the mark's centre, so laid over each other they
-// are one picture that stays sharp from the tile out to the robot. Both come from
-// the robot's own render script (see "The hero" in README.md).
+// are one picture that stays sharp from the tile out to the robot. The head is
+// pictures of its own through the same camera: level, then coming down to where
+// the five have it. All come from the robot's own render script (see "The hero"
+// in README.md).
 //
 // CSS lays out the resting state: headline, then the whole robot. The script
 // only draws the zoom while the visitor scrolls through [data-travel], so
@@ -16,12 +19,22 @@ import type { ImageMetadata } from 'astro';
 import Mark from './Mark.astro';
 import zoom from '../assets/hero/zoom.json';
 
-const pictures = import.meta.glob<{ default: ImageMetadata }>('../assets/hero/*.webp', {
+const pictures = import.meta.glob<{ default: ImageMetadata }>('../assets/hero/**/*.webp', {
   eager: true,
 });
+const picture = (name: string) => pictures[`../assets/hero/${name}.webp`].default;
 
 const [frame] = zoom.levels; // the whole robot
-const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.webp`].default);
+const robot = picture(frame.name);
+const sources = {
+  levels: zoom.levels.map(({ name }) => picture(name).src),
+  // the head level with the camera, sharp, for while it comes into view
+  head: picture('head').src,
+  // the head coming down, the last as the levels have it
+  frames: Array.from({ length: zoom.head.frames }, (_, i) =>
+    picture(`head/${String(i).padStart(2, '0')}`).src
+  ),
+};
 ---
 
 <section data-hero>
@@ -33,7 +46,7 @@ const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.w
          end. `lvh` so that holds on a phone once the toolbar has slid away. -->
     <canvas
       data-canvas
-      data-pictures={JSON.stringify(sources.map(({ src }) => src))}
+      data-pictures={JSON.stringify(sources)}
       class="pointer-events-none absolute top-0 left-0 hidden h-[150lvh] w-full zooming:block"
       aria-hidden="true"></canvas>
 
@@ -84,9 +97,9 @@ const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.w
          robot and this picture is transparent. -->
     <img
       data-robot
-      src={sources[0].src}
-      width={sources[0].width}
-      height={sources[0].height}
+      src={robot.src}
+      width={robot.width}
+      height={robot.height}
       alt="A two-armed robot on a lifting column and a wheeled base, the Ambotics mark on its chest."
       decoding="sync"
       draggable="false"
@@ -100,7 +113,7 @@ const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.w
 </section>
 
 <script>
-  import { mark, levels as fields } from '../assets/hero/zoom.json';
+  import { mark, levels as fields, head as headField } from '../assets/hero/zoom.json';
 
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   const part = <T extends HTMLElement = HTMLElement>(name: string) =>
@@ -127,6 +140,12 @@ const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.w
     const clamp = (n: number) => Math.min(Math.max(n, 0), 1);
     // Fast off the mark, slow onto the robot.
     const ease = (p: number) => 1 - (1 - p) ** 1.5;
+    // The head starts to turn down once the whole of it is in view on a
+    // laptop, and is down just before the robot is at rest.
+    const turned = (p: number) => {
+      const t = clamp((p - 0.55) / 0.4);
+      return t * t * (3 - 2 * t);
+    };
 
     // All in CSS px, from the stage's top left corner.
     let rest = 1; // px per mm at rest
@@ -204,6 +223,26 @@ const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.w
         context.globalAlpha = shown[i];
         context.drawImage(picture, left + x * px, top + y * px, w * px, h * px);
       });
+
+      // The head. Its last picture is the head the pictures above already
+      // show, so that one is not drawn. The first has a sharp copy.
+      const turn = Math.round(turned(p) * (heads.length - 1));
+      const sharp = !turn && px * ratio > 1.2 * (heads[0].naturalWidth / headField.w);
+      const head = sharp && level.naturalWidth ? level : heads[turn];
+      if (turn < heads.length - 1 && head.naturalWidth) {
+        const { x, y, w, h } = headField;
+        // The pictures' own head goes first, from inside the faded edge of
+        // the head's picture: 6% of its longer side, and 8% is left.
+        const edge = 0.08 * Math.max(w, h);
+        context.clearRect(
+          left + (x + edge) * px,
+          top + (y + edge) * px,
+          (w - 2 * edge) * px,
+          (h - 2 * edge) * px
+        );
+        context.globalAlpha = 1;
+        context.drawImage(head, left + x * px, top + y * px, w * px, h * px);
+      }
     };
 
     const scrolled = () =>
@@ -241,17 +280,31 @@ const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.w
     resting.observe(view);
 
     // The pictures, each drawn as soon as it is in. The cover goes once the
-    // closer ones are: the first screen is theirs.
-    const sources: string[] = JSON.parse(canvas.dataset.pictures!);
-    const pictures = sources.map((src) => Object.assign(new Image(), { src }));
-    const loaded = pictures.map((picture) =>
-      picture.decode().then(
+    // closer ones are: the first screen is theirs. The head's frames come last.
+    const sources: { levels: string[]; head: string; frames: string[] } = JSON.parse(
+      canvas.dataset.pictures!
+    );
+    const load = (src: string) => {
+      const picture = Object.assign(new Image(), { src });
+      const loaded = picture.decode().then(
         () => draw(p),
         () => {}
-      )
-    );
-    Promise.all(loaded.slice(1)).then(() => {
+      );
+      return { picture, loaded };
+    };
+    const levels = sources.levels.map(load);
+    const pictures = levels.map(({ picture }) => picture);
+    const { picture: level, loaded: levelLoaded } = load(sources.head);
+    const heads = sources.frames.map(() => new Image());
+    Promise.all([...levels.slice(1).map(({ loaded }) => loaded), levelLoaded]).then(() => {
       cover.style.opacity = '0';
+      sources.frames.forEach((src, i) => {
+        heads[i].src = src;
+        heads[i].decode().then(
+          () => draw(p),
+          () => {}
+        );
+      });
     });
   }
 </script>
