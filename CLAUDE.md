@@ -132,7 +132,8 @@ simple; after Apple and moving.parts. Then: the carousel on to the right edge of
 screen; live as a preview at `/v2-preview`; the head turns as the visitor scrolls and
 ends looking straight ahead (the first pass turned it down from there, and he asked for the
 other way); the camera's lenses reflective; the logo the same blue as the last panel, as a
-try. How it works and what goes when it replaces `/` is in README.md, "/v2-preview".
+try; the head following the pointer, his pick from a list of ideas after moving.parts. How
+it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 
 - **`/` must not change while the preview is up.** The two share `Carousel.astro`,
   `ContactForm.astro`, `Footer.astro`, `Layout.astro` and `global.css`. After a change to
@@ -168,7 +169,18 @@ try. How it works and what goes when it replaces `/` is in README.md, "/v2-previ
   once at the start.
 - **The pictures keep their transparency.** Laid on the page's colour and saved without
   it, a closer picture showed as a faint rectangle: lossy WebP turns `#f4f4f4` into
-  `#f5f5f5`.
+  `#f5f5f5`. Tried again for the head's looks, where it halves the bytes: Chromium drew
+  their ground `#f6f6f6`. `webp:alpha-quality=60` is what cuts a look's bytes instead.
+- **At rest the turned head is a canvas of its own over the robot's picture.** The robot's
+  own head is in that picture, so the canvas paints the page's colour, read off `body`,
+  inside the look's faded edge, then draws the look. In the zoom's canvas the same box is
+  cleared instead.
+- **The head stops on a look, never between two.** Between looks it is a blend of them,
+  and a blend at rest shows two heads: a look 5 degrees on has the head 7mm further along.
+  The blend adds the looks up (`lighter`) on a canvas of its own. Drawn over each other,
+  the first stays whole where the next is clear.
+- **The looks wait for a pointer**: a `pointermove` that is no touch, or a `wheel`, which
+  says where the pointer is before it has moved.
 - **The canvas is never over 16 million pixels.** iOS draws nothing on a larger one.
 - **A headless browser says nothing about the zoom's speed.** Playwright's Chromium and
   WebKit have no GPU here and take 100ms or more a frame.
@@ -178,6 +190,9 @@ try. How it works and what goes when it replaces `/` is in README.md, "/v2-previ
 - `/v2-preview` is live for sign-off. It was checked in Playwright's Chromium and WebKit at
   1440 × 900 and 390 × 844. It was not run in a real Safari, on a phone, or on a slow
   machine.
+- The head's turn after the pointer was checked as stills: the pointer at nine places, in
+  both browsers. Nobody has watched it move. How far it turns for a pointer (`reach`) and
+  how fast (80ms in `follow`) are first guesses.
 
 ## Gotchas
 
