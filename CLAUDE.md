@@ -129,9 +129,10 @@ different weights.
 Daniel's brief (NOW-318, 2026-11-15): an Apple-like page that starts on the logo; scrolling
 zooms out and the logo reveals itself on the chest of the actual robot from the mod repo;
 simple; after Apple and moving.parts. Then: the carousel on to the right edge of the
-screen; live as a preview at `/v2-preview`; the head looks straight at the camera, then
-turns downwards as the visitor scrolls. How it works and what goes when it replaces `/` is
-in README.md, "/v2-preview".
+screen; live as a preview at `/v2-preview`; the head turns as the visitor scrolls and
+ends looking straight ahead (the first pass turned it down from there, and he asked for the
+other way); the camera's lenses reflective. How it works and what goes when it replaces `/`
+is in README.md, "/v2-preview".
 
 - **`/` must not change while the preview is up.** The two share `Carousel.astro`,
   `ContactForm.astro`, `Footer.astro`, `Layout.astro` and `global.css`. After a change to

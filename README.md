@@ -195,19 +195,21 @@ runs on to the right edge of the screen.
 ### The hero
 
 The page opens on the mark. Scrolling zooms out, and the mark turns out to be the tile on
-the robot's chest. The head comes into view looking at the visitor, then turns down to the
-robot's hands. The headline comes in over the robot, and the page scrolls on down the robot
-to its base.
+the robot's chest. The head comes into view looking down at the robot's hands, then lifts
+to look straight at the visitor. The headline comes in over the robot, and the page scrolls
+on down the robot to its base.
 
 - **One camera, five pictures.** `src/assets/hero/` holds the whole robot and four squares
   about the mark (`torso`, `chest`, `mark`, `tile`), each 2400px on its longer side, all
   through one camera with a zoom lens. `zoom.json` gives each picture's place in mm on the
   mark's plane, from the mark's centre. Laid over each other they are one picture that is
   sharp at every zoom, from 1.5px per mm for the whole robot to 48 for the tile.
-- **The head is pictures of its own**, through the same camera: `head.webp` has it level
-  with the camera, and `head/00.webp` to `head/31.webp` bring it down 62 degrees, 2 a
-  picture, to where the five pictures have it. The page draws one of them over the five.
-- **888 kB in all.** The five pictures are 411 kB and the head's are 477 kB. The head's
+- **The head is pictures of its own**, through the same camera: `head.webp` has it at
+  home, looking 62 degrees down, and `head/00.webp` to `head/31.webp` lift it, 2 degrees a
+  picture, to where the five pictures have it: level, looking at the visitor. The page
+  draws one of them over the five. The camera's lenses are domes of dark glass, so they
+  catch the lights as the head lifts.
+- **908 kB in all.** The five pictures are 416 kB and the head's are 492 kB. The head's
   32 are fetched once the first screen is up.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
   no script. The script draws the zoom on a canvas while the visitor scrolls through the
@@ -233,7 +235,8 @@ tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -
     --mark-svg <this repo>/src/assets/mark.svg    # about 20 min
 ```
 
-62 is the neck's home tilt: that far up, the head is level. Then here,
+62 is the neck's home tilt: that far up, the head is level, and that is where the five
+pictures have it. Then here,
 `scripts/hero.sh <out>/hero` fades each picture's edges, encodes it into
 `src/assets/hero/` and copies `zoom.json`: 2 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
