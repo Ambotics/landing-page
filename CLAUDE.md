@@ -131,8 +131,8 @@ zooms out and the logo reveals itself on the chest of the actual robot from the 
 simple; after Apple and moving.parts. Then: the carousel on to the right edge of the
 screen; live as a preview at `/v2-preview`; the head turns as the visitor scrolls and
 ends looking straight ahead (the first pass turned it down from there, and he asked for the
-other way); the camera's lenses reflective. How it works and what goes when it replaces `/`
-is in README.md, "/v2-preview".
+other way); the camera's lenses reflective; the logo the same blue as the last panel, as a
+try. How it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 
 - **`/` must not change while the preview is up.** The two share `Carousel.astro`,
   `ContactForm.astro`, `Footer.astro`, `Layout.astro` and `global.css`. After a change to
@@ -156,8 +156,12 @@ is in README.md, "/v2-preview".
   `max(24.2vw, 22.7svh)` wide: the tile is 30mm, and the 124 × 132mm of plain chest cover
   around the mark has to fill the screen, else the shoulders show on the first screen. A
   new chest cover or a moved mark needs both numbers measured again, off `chest.webp`.
-- **The cover's two colours are read off the render**, the cover's grey beside the tile and
-  the tile itself in `mark.webp`. Read them again after a new render.
+- **The mark is the accent on `/v2-preview`**: on the first screen and on the robot's
+  chest. That is a second blue surface, against the rule above. Daniel asked for it as a
+  try; it stays or goes at sign-off.
+- **The cover's grey is read off the render**, beside the tile in `mark.webp`. Read it
+  again after a new render. The cover's tile is `accent`, and `scripts/hero.sh` moves the
+  rendered tile to the same value.
 - **The `zooming` condition is written twice**, in `global.css` and in `Hero.astro`'s
   script. The script cannot read it off the page: WebKit runs a module script before the
   stylesheet is in. For the same reason the script measures in a `ResizeObserver`, never
