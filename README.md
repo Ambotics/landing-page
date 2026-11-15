@@ -209,7 +209,7 @@ on down the robot to its base.
   picture, to where the five pictures have it: level, looking at the visitor. The page
   draws one of them over the five. The camera's lenses are domes of dark glass, so they
   catch the lights as the head lifts.
-- **908 kB in all.** The five pictures are 416 kB and the head's are 492 kB. The head's
+- **924 kB in all.** The five pictures are 431 kB and the head's are 493 kB. The head's
   32 are fetched once the first screen is up.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
   no script. The script draws the zoom on a canvas while the visitor scrolls through the
@@ -219,8 +219,11 @@ on down the robot to its base.
   `global.css`).
 - **The first screen is CSS too.** A cover draws the mark on the chest cover's grey at the
   size the zoom starts from, so the page opens on the mark before a picture has loaded. Its
-  two colours, `#d6d7d5` and `#2c2e2f`, are the render's, read off `mark.webp`; they are
-  not in the palette.
+  grey, `#d6d7d5`, is the render's, read off `mark.webp`; it is not in the palette.
+- **The mark's tile is the accent**, the footer's blue, on the first screen and on the
+  robot. The render cannot give that blue: its tone curve pales it, and `--mark-blue` is the
+  nearest it has, `#3466db`. `scripts/hero.sh` moves the tile's blue the rest of the way, to
+  `--color-accent`.
 - **The robot is the one in `Ambotics/open_arm-mods`** (private): `full_robot/`, the robot
   to build. Its tile is drawn from `src/assets/mark.svg` here, so the mark on the chest is
   the page's own.
@@ -231,14 +234,14 @@ To render the pictures again, in a checkout of `open_arm-mods` with
 ```sh
 tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup \
     --python full_robot/shade.py -- full_robot/robot_325_posed.glb <out>/hero zoom \
-    --samples 512 --zoom-px 2400 --zoom-head 62 32 \
+    --samples 512 --zoom-px 2400 --zoom-head 62 32 --mark-blue \
     --mark-svg <this repo>/src/assets/mark.svg    # about 20 min
 ```
 
 62 is the neck's home tilt: that far up, the head is level, and that is where the five
 pictures have it. Then here,
-`scripts/hero.sh <out>/hero` fades each picture's edges, encodes it into
-`src/assets/hero/` and copies `zoom.json`: 2 min when it runs outside the agent's
+`scripts/hero.sh <out>/hero` moves the tile to the accent, fades each picture's edges,
+encodes it into `src/assets/hero/` and copies `zoom.json`: 2 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
 
 ### When it replaces /

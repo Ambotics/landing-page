@@ -51,9 +51,10 @@ const sources = {
       class="pointer-events-none absolute top-0 left-0 hidden h-[150lvh] w-full zooming:block"
       aria-hidden="true"></canvas>
 
-    <!-- The first screen. The cover is the mark on the chest cover's grey, drawn
-         by CSS at the size the zoom starts from, so the page opens on the mark
-         before any picture has loaded; the script reads that size off it. The
+    <!-- The first screen. The cover is the mark, in the accent like its tile on
+         the robot, on the chest cover's grey. CSS draws it at the size the zoom
+         starts from, so the page opens on the mark before any picture has
+         loaded; the script reads that size off it. The
          tile spans 30 of the 124 × 132 mm of plain cover around the mark, and
          that patch has to fill the screen: 30/124 of the width, 30/132 of the
          height, whichever is larger. -->
@@ -62,7 +63,7 @@ const sources = {
         data-cover
         class="absolute inset-0 grid place-items-center bg-[#d6d7d5] transition-opacity duration-500"
       >
-        <Mark class="w-[max(24.2vw,22.7svh)] text-[#2c2e2f]" />
+        <Mark class="w-[max(24.2vw,22.7svh)] text-accent" />
       </div>
       <p
         data-cue

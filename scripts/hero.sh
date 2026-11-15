@@ -3,16 +3,43 @@
 #   scripts/hero.sh <prefix>    reads <prefix>_zoom.json and <prefix>_zoom_<name>.png, as shade.py wrote them
 # Each picture fades out over its last 6 % on every side: a closer one into the wider one under it, the
 # widest into the page, where its floor shadow would otherwise end on a line, the head's into the robot.
+# The mark's tile takes the page's accent. The render cannot give that blue (its tone curve pales it), so
+# the tile comes in the nearest blue the render has, and is moved the rest of the way here.
 set -e
+zmodload zsh/mathfunc
 prefix=$1
-out=${0:A:h:h}/src/assets/hero
+site=${0:A:h:h}
+out=$site/src/assets/hero
+tmp=$(mktemp -d)
+trap "rm -rf $tmp" EXIT
 rm -rf $out/*.webp $out/head
 mkdir -p $out/head
 cp ${prefix}_zoom.json $out/zoom.json
+mark=$(jq .mark $out/zoom.json)
+accent=$(sed -n 's/.*--color-accent: *#\([0-9a-f]*\);.*/\1/p' $site/src/styles/global.css)
+accent=($(( 16#${accent[1,2]} / 2.55 )) $(( 16#${accent[3,4]} / 2.55 )) $(( 16#${accent[5,6]} / 2.55 )))   # r g b, percent
 for in in ${prefix}_zoom_*.png; do
   name=${${in#${prefix}_zoom_}%.png}
-  name=${name/head_/head/}   # the head's frames go in a directory of their own
   size=($(magick identify -format '%w %h' $in))
+  if [[ $name != head* ]]; then
+    # the tile's box in this picture, 2 px out for its soft edge
+    field=($(jq -r --arg name $name '.levels[] | select(.name == $name) | "\(.x) \(.y) \(.w) \(.h)"' $out/zoom.json))
+    px=$(( size[1] / field[3] ))   # per mm
+    side=$(( int(mark * px) + 4 ))
+    at=+$(( int((-mark / 2 - field[1]) * px) - 2 ))+$(( int((-mark / 2 - field[2]) * px) - 2 ))
+    magick $in -crop ${side}x${side}$at +repage $tmp/tile.png
+    # its blue as rendered, from inside its top left corner, and the red of the cover that shows through the A
+    spot=$(( int(side / 8) ))
+    blue=($(magick $tmp/tile.png -crop ${spot}x${spot}+${spot}+${spot} +repage -resize '1x1!' -format '%[fx:100*u.r] %[fx:100*u.g] %[fx:100*u.b]' info:))
+    cover=$(magick $tmp/tile.png -crop $(( spot / 2 ))x$(( spot / 2 ))+$(( int(side * 0.66) ))+$(( int(side * 0.64) )) +repage -resize '1x1!' -format '%[fx:100*u.r]' info:)   # in the A's long stroke
+    # as much of the move as a pixel is tile: all of it on the blue, none on the A, part on the edge between
+    magick $tmp/tile.png -channel R -separate +channel -level ${blue[1]}%,${cover}% -negate $tmp/much.png
+    magick $tmp/tile.png -channel R -evaluate add $(( accent[1] - blue[1] ))% -channel G -evaluate add $(( accent[2] - blue[2] ))% \
+      -channel B -evaluate add $(( accent[3] - blue[3] ))% +channel $tmp/moved.png
+    magick $in \( $tmp/tile.png $tmp/moved.png $tmp/much.png -composite \) -geometry $at -composite $tmp/in.png
+    in=$tmp/in.png
+  fi
+  name=${name/head_/head/}   # the head's frames go in a directory of their own
   fade=$(( (size[1] > size[2] ? size[1] : size[2]) * 6 / 100 ))
   # the picture's own transparency times a white box, blurred, that stops half the fade short of the edges
   magick $in \
