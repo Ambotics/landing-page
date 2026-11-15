@@ -203,33 +203,62 @@ const sources = {
 
     // Where the head looks, in degrees to the right and up from straight ahead.
     const gaze = { pan: 0, up: 0 };
-    // The head as it looks that way. There is a look every few degrees.
-    // Between four of them the head is all four, each as much as it is near;
-    // it comes to rest on one.
-    const blend = document.createElement('canvas');
-    const blended = blend.getContext('2d')!;
+    // The head as it looks that way. There is a look every few degrees. On the
+    // way from one to the next the head is the nearer of them, moved to where
+    // the head is by then, so it stays sharp and moves evenly: a blend of two
+    // looks is two heads. What stands still under the neck stays where it is,
+    // and the neck between is stretched.
+    const posed = document.createElement('canvas');
+    const pose = posed.getContext('2d')!;
     const look = (pan: number, up: number) => {
-      const { pans, ups } = lookField;
+      const { y: top, w, pans, ups, eyes, chins, neck } = lookField;
       const column = (pan - pans[0]) / (pans[1] - pans[0]);
       const row = (ups[0] - up) / (ups[0] - ups[1]);
-      const c = Math.min(Math.floor(column), pans.length - 2);
-      const r = Math.min(Math.floor(row), ups.length - 2);
+      const c = Math.round(column);
+      const r = Math.round(row);
       const side = looks[0].naturalWidth / pans.length;
-      blend.width = side; // which clears it too
-      blend.height = looks[0].naturalHeight;
-      // Added up, not laid over each other: the first would stay whole where
-      // the next is clear.
-      blended.globalCompositeOperation = 'lighter';
-      for (const [i, j] of [
-        [0, 0],
-        [1, 0],
-        [0, 1],
-        [1, 1],
-      ]) {
-        blended.globalAlpha = (i ? column - c : 1 - column + c) * (j ? row - r : 1 - row + r);
-        blended.drawImage(looks[r + j], (c + i) * side, 0, side, blend.height, 0, 0, side, blend.height);
-      }
-      return blend;
+      const height = looks[0].naturalHeight;
+      const px = side / w; // the look's own, per mm
+
+      // How far the eyes are from where this look has them: between four
+      // looks they are between those looks' eyes.
+      const c0 = Math.min(Math.floor(column), pans.length - 2);
+      const r0 = Math.min(Math.floor(row), ups.length - 2);
+      const between = (i: number) => {
+        const along = (r: number) =>
+          eyes[r][c0][i] + (eyes[r][c0 + 1][i] - eyes[r][c0][i]) * (column - c0);
+        return along(r0) + (along(r0 + 1) - along(r0)) * (row - r0);
+      };
+      const dx = (between(0) - eyes[r][c][0]) * px;
+      const dy = (between(1) - eyes[r][c][1]) * px;
+
+      // In strips from the top. The head down to its chin moves whole, the neck
+      // under it less the lower, a row of px at a time, and from where the neck
+      // stands still nothing moves. Each strip runs a px into the next, so none
+      // shows a seam.
+      const chin = Math.round((chins[r][c] - top) * px);
+      const still = Math.round((neck - top) * px);
+      const moved = (y: number) => clamp((still - y) / (still - chin));
+      const edges = [0, ...Array.from({ length: still - chin + 1 }, (_, i) => chin + i), height];
+      posed.width = side; // which clears it too
+      posed.height = height;
+      edges.slice(1).forEach((end, i) => {
+        const from = edges[i];
+        const to = Math.min(end + 1, height);
+        const at = from + dy * moved(from);
+        pose.drawImage(
+          looks[r],
+          c * side,
+          from,
+          side,
+          to - from,
+          dx * moved((from + end) / 2),
+          at,
+          side,
+          to + dy * moved(to) - at
+        );
+      });
+      return posed;
     };
 
     // A picture of the head goes over the robot's own head, with the mark's
@@ -356,14 +385,15 @@ const sources = {
     const aim = (p: number) => {
       if (!watching || !pointer || !turned(p)) return { pan: 0, up: 0 };
       const s = stage.getBoundingClientRect();
-      const [eyesX, eyesY] = lookField.eyes;
+      const { pans, ups, eyes } = lookField;
+      const [eyesX, eyesY] = eyes[ups.indexOf(0)][pans.indexOf(0)]; // looking straight ahead
       const angle = (px: number) =>
         (turned(p) * Math.atan(px / rest / reach) * 180) / Math.PI;
       const nearest = (list: number[], to: number) =>
         list.reduce((a, b) => (Math.abs(b - to) < Math.abs(a - to) ? b : a));
       return {
-        pan: nearest(lookField.pans, angle(pointer.x - s.left - x - eyesX * rest)),
-        up: nearest(lookField.ups, angle(s.top + y + eyesY * rest - pointer.y)),
+        pan: nearest(pans, angle(pointer.x - s.left - x - eyesX * rest)),
+        up: nearest(ups, angle(s.top + y + eyesY * rest - pointer.y)),
       };
     };
 
