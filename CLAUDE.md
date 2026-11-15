@@ -196,6 +196,9 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 - `/v2-preview` is live for sign-off. It was checked in Playwright's Chromium and WebKit at
   1440 × 900 and 390 × 844. It was not run in a real Safari, on a phone, or on a slow
   machine.
+- NOW-318 is closed (Daniel, 2026-11-15), with the render script's side merged into
+  `open_arm-mods` main (its PR #24). `/v2-preview` still stands beside `/`: he has not asked
+  for it to replace `/`, and has not ruled on the blue mark.
 - Daniel watched the head follow the pointer on the live page ("Nice!"). How far it turns
   for a pointer (`reach`) and how fast (80ms in `follow`) are as first set; he has asked for
   no change.
