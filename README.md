@@ -214,7 +214,7 @@ on down the robot to its base. At rest the head turns after the visitor's pointe
   side, 20 up and 25 down, 17 side by side in a picture for each height. The page takes the
   pointer to hang 700mm in front of the robot and turns the head to the nearest look, most
   of the way in a fifth of a second. On the way it blends the looks around it; it stops on
-  one. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
+  one. Over the last 5% of the zoom it turns part of the way, to the look nearest that. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
   robot can take.
 - **909 kB for every visitor, 533 kB more for one with a mouse.** The five pictures are
   430 kB and the head's lift is 479 kB. The lift's 32 are fetched once the first screen is
