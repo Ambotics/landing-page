@@ -179,6 +179,10 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
   and a blend at rest shows two heads: a look 5 degrees on has the head 7mm further along.
   The blend adds the looks up (`lighter`) on a canvas of its own. Drawn over each other,
   the first stays whole where the next is clear.
+  Short of rest the head stops on a look too. Over the last 5% of the travel it turns part
+  of the way to the pointer, and its aim is the look nearest that. The part was once a
+  factor on the look drawn, and the head sat blurred wherever the scroll stopped there
+  (Daniel, 2026-11-15).
 - **The looks wait for a pointer**: a `pointermove` that is no touch, or a `wheel`, which
   says where the pointer is before it has moved.
 - **The canvas is never over 16 million pixels.** iOS draws nothing on a larger one.
@@ -190,9 +194,9 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 - `/v2-preview` is live for sign-off. It was checked in Playwright's Chromium and WebKit at
   1440 × 900 and 390 × 844. It was not run in a real Safari, on a phone, or on a slow
   machine.
-- The head's turn after the pointer was checked as stills: the pointer at nine places, in
-  both browsers. Nobody has watched it move. How far it turns for a pointer (`reach`) and
-  how fast (80ms in `follow`) are first guesses.
+- Daniel watched the head follow the pointer on the live page ("Nice!"). How far it turns
+  for a pointer (`reach`) and how fast (80ms in `follow`) are as first set; he has asked for
+  no change.
 
 ## Gotchas
 

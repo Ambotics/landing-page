@@ -336,9 +336,9 @@ const sources = {
       if (lift < heads.length - 1 && head.naturalWidth) {
         replace(context, head, headField, left, top, px);
       }
-      if (watching && turned(p)) {
-        const picture = look(gaze.pan * turned(p), gaze.up * turned(p));
-        replace(context, picture, lookField, left, top, px);
+      // The head on its way to the pointer, or back from it.
+      if (watching && (gaze.pan || gaze.up)) {
+        replace(context, look(gaze.pan, gaze.up), lookField, left, top, px);
       }
     };
 
@@ -347,15 +347,18 @@ const sources = {
 
     // The look that points the head at the pointer, as if the pointer hung
     // `reach` mm in front of the robot: straight ahead until the looks are in,
-    // and when the pointer has left the page.
+    // and when the pointer has left the page. Short of rest the head turns
+    // part of the way, and that is a look as well: the scroll can stop there,
+    // and between two looks the head is a blur.
     const reach = 700;
     let watching = false;
     let pointer: { x: number; y: number } | undefined;
-    const aim = () => {
-      if (!watching || !pointer) return { pan: 0, up: 0 };
+    const aim = (p: number) => {
+      if (!watching || !pointer || !turned(p)) return { pan: 0, up: 0 };
       const s = stage.getBoundingClientRect();
       const [eyesX, eyesY] = lookField.eyes;
-      const angle = (px: number) => (Math.atan(px / rest / reach) * 180) / Math.PI;
+      const angle = (px: number) =>
+        (turned(p) * Math.atan(px / rest / reach) * 180) / Math.PI;
       const nearest = (list: number[], to: number) =>
         list.reduce((a, b) => (Math.abs(b - to) < Math.abs(a - to) ? b : a));
       return {
@@ -376,7 +379,7 @@ const sources = {
       const to = scrolled();
       p += (to - p) * (to === 1 ? 0.5 : 0.25);
       if (Math.abs(to - p) < 0.0005) p = to;
-      const at = aim();
+      const at = aim(p);
       const closer = 1 - Math.exp(-Math.min(now - (before || now - 16), 50) / 80);
       gaze.pan += (at.pan - gaze.pan) * closer;
       gaze.up += (at.up - gaze.up) * closer;
