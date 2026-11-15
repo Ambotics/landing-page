@@ -175,11 +175,13 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
   own head is in that picture, so the canvas paints the page's colour, read off `body`,
   inside the look's faded edge, then draws the look. In the zoom's canvas the same box is
   cleared instead.
-- **The head stops on a look, never between two.** Between looks it is a blend of them,
-  and a blend at rest shows two heads: a look 5 degrees on has the head 7mm further along.
-  The blend adds the looks up (`lighter`) on a canvas of its own. Drawn over each other,
-  the first stays whole where the next is clear.
-  Short of rest the head stops on a look too. Over the last 5% of the travel it turns part
+- **Two looks are never blended.** A blend is two heads: a look 5 degrees on has the head
+  5 to 7mm further along. Daniel saw it at rest, then as a blur while the head turned
+  (2026-11-15). Between looks the script draws the nearer one in strips: the head down to
+  its chin moved by the way its eyes have gone, the neck under it sheared a row of px at a
+  time, the still part as it is. `zoom.json` has every look's eyes and chin and the neck's
+  still top.
+- **The head stops on a look.** Short of rest it does too. Over the last 5% of the travel it turns part
   of the way to the pointer, and its aim is the look nearest that. The part was once a
   factor on the look drawn, and the head sat blurred wherever the scroll stopped there
   (Daniel, 2026-11-15).
@@ -197,6 +199,11 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 - Daniel watched the head follow the pointer on the live page ("Nice!"). How far it turns
   for a pointer (`reach`) and how fast (80ms in `follow`) are as first set; he has asked for
   no change.
+- The head's turn without a blend was checked frame by frame, not watched: Playwright's
+  clock held (`page.clock.install`, `pauseAt`, `runFor(16)`) and a screenshot a frame, a
+  turn sideways and one up and down in Chromium, a diagonal one in WebKit. The lenses keep
+  their size and darkness in every frame, and their way from frame to frame falls off
+  evenly. At a change of look the head's shape changes at once: a px or two at its ends.
 
 ## Gotchas
 
