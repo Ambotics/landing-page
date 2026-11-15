@@ -1,15 +1,16 @@
 ---
 // The hero: the page opens on the mark, and scrolling zooms out until the mark
 // is the tile on the robot's chest, with the headline over the robot. The head
-// comes into view looking at the visitor, then turns down to the robot's hands.
+// comes into view looking down at the robot's hands, then lifts to look at the
+// visitor.
 //
 // The robot is five pictures from one camera with a zoom lens: the whole robot,
 // then squares about the mark down to its tile. `zoom.json` says where each lies,
 // in mm on the mark's plane from the mark's centre, so laid over each other they
 // are one picture that stays sharp from the tile out to the robot. The head is
-// pictures of its own through the same camera: level, then coming down to where
-// the five have it. All come from the robot's own render script (see "The hero"
-// in README.md).
+// pictures of its own through the same camera: looking down, then lifting to
+// where the five have it, level. All come from the robot's own render script
+// (see "The hero" in README.md).
 //
 // CSS lays out the resting state: headline, then the whole robot. The script
 // only draws the zoom while the visitor scrolls through [data-travel], so
@@ -28,9 +29,9 @@ const [frame] = zoom.levels; // the whole robot
 const robot = picture(frame.name);
 const sources = {
   levels: zoom.levels.map(({ name }) => picture(name).src),
-  // the head level with the camera, sharp, for while it comes into view
+  // the head looking down, sharp, for while it comes into view
   head: picture('head').src,
-  // the head coming down, the last as the levels have it
+  // the head lifting, the last as the levels have it
   frames: Array.from({ length: zoom.head.frames }, (_, i) =>
     picture(`head/${String(i).padStart(2, '0')}`).src
   ),
@@ -140,9 +141,9 @@ const sources = {
     const clamp = (n: number) => Math.min(Math.max(n, 0), 1);
     // Fast off the mark, slow onto the robot.
     const ease = (p: number) => 1 - (1 - p) ** 1.5;
-    // The head starts to turn down once the whole of it is in view on a
-    // laptop, and is down just before the robot is at rest.
-    const turned = (p: number) => {
+    // The head starts to lift once the whole of it is in view on a laptop, and
+    // looks at the visitor just before the robot is at rest.
+    const lifted = (p: number) => {
       const t = clamp((p - 0.55) / 0.4);
       return t * t * (3 - 2 * t);
     };
@@ -226,10 +227,10 @@ const sources = {
 
       // The head. Its last picture is the head the pictures above already
       // show, so that one is not drawn. The first has a sharp copy.
-      const turn = Math.round(turned(p) * (heads.length - 1));
-      const sharp = !turn && px * ratio > 1.2 * (heads[0].naturalWidth / headField.w);
-      const head = sharp && level.naturalWidth ? level : heads[turn];
-      if (turn < heads.length - 1 && head.naturalWidth) {
+      const lift = Math.round(lifted(p) * (heads.length - 1));
+      const close = !lift && px * ratio > 1.2 * (heads[0].naturalWidth / headField.w);
+      const head = close && sharp.naturalWidth ? sharp : heads[lift];
+      if (lift < heads.length - 1 && head.naturalWidth) {
         const { x, y, w, h } = headField;
         // The pictures' own head goes first, from inside the faded edge of
         // the head's picture: 6% of its longer side, and 8% is left.
@@ -294,9 +295,9 @@ const sources = {
     };
     const levels = sources.levels.map(load);
     const pictures = levels.map(({ picture }) => picture);
-    const { picture: level, loaded: levelLoaded } = load(sources.head);
+    const { picture: sharp, loaded: sharpLoaded } = load(sources.head);
     const heads = sources.frames.map(() => new Image());
-    Promise.all([...levels.slice(1).map(({ loaded }) => loaded), levelLoaded]).then(() => {
+    Promise.all([...levels.slice(1).map(({ loaded }) => loaded), sharpLoaded]).then(() => {
       cover.style.opacity = '0';
       sources.frames.forEach((src, i) => {
         heads[i].src = src;
