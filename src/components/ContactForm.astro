@@ -18,11 +18,11 @@
 // one" is a real question on a form this plain; the single-field pill this
 // replaced could get away with it because there was nothing to confuse it with.
 //
-// The labels are `ink`, not `nav` — including the "(optional)" qualifier, which
-// is real text and so cannot sit at nav's 3.59:1 on the page. It is set apart by
-// weight instead of colour. Same rule as the logo wall's heading.
-import SectionHeading from './SectionHeading.astro';
-
+// The labels are `ink`, including the "(optional)" qualifier: it is real text,
+// and a grey light enough to read as secondary does not clear AA on the page
+// (`#808080` is 3.59:1). It is set apart by weight instead of colour.
+//
+// The form only: `#contact` and its heading live in index.astro.
 const ACCESS_KEY = 'bb4e437c-51d9-4ba4-a228-bcdd4303058f';
 
 const fields = [
@@ -37,72 +37,65 @@ const controlClass =
   'mt-2 w-full rounded-xl bg-field px-4 py-3 font-sat text-[15px] tracking-[-0.01em] text-ink outline-none transition-shadow focus:ring-2 focus:ring-accent/35';
 ---
 
-<!-- mt-24, matching the gap between top-level sections. Applications now ends
-     with a 64px-spaced subsection ("Where to start"), so at mt-16 the form read
-     as one more block inside it rather than as the next section. -->
-<section id="contact" class="mt-24 max-w-content">
-  <SectionHeading class="mb-5">Get in touch</SectionHeading>
+<form data-notify action="https://api.web3forms.com/submit" method="POST" class="max-w-content">
+  <input type="hidden" name="access_key" value={ACCESS_KEY} />
 
-  <form data-notify action="https://api.web3forms.com/submit" method="POST">
-    <input type="hidden" name="access_key" value={ACCESS_KEY} />
+  <!-- Web3Forms rejects the submission if this is filled, which only a bot
+       does. `hidden` rather than off-screen positioning: a visually hidden but
+       focusable field is reachable by keyboard and by screen readers, and a
+       visitor who tabs into it fails their own submission. -->
+  <input type="checkbox" name="botcheck" hidden tabindex="-1" autocomplete="off" />
 
-    <!-- Web3Forms rejects the submission if this is filled, which only a bot
-         does. `hidden` rather than off-screen positioning: a visually hidden but
-         focusable field is reachable by keyboard and by screen readers, and a
-         visitor who tabs into it fails their own submission. -->
-    <input type="checkbox" name="botcheck" hidden tabindex="-1" autocomplete="off" />
+  <div class="grid gap-4 sm:grid-cols-2">
+    {
+      fields.map(({ id, label, type, autocomplete, wide }) => (
+        <div class:list={[wide && 'sm:col-span-2']}>
+          <label for={id} class={labelClass}>
+            {label}
+          </label>
+          <input
+            id={id}
+            name={id}
+            type={type}
+            autocomplete={autocomplete}
+            required
+            class={controlClass}
+          />
+        </div>
+      ))
+    }
 
-    <div class="grid gap-4 sm:grid-cols-2">
-      {
-        fields.map(({ id, label, type, autocomplete, wide }) => (
-          <div class:list={[wide && 'sm:col-span-2']}>
-            <label for={id} class={labelClass}>
-              {label}
-            </label>
-            <input
-              id={id}
-              name={id}
-              type={type}
-              autocomplete={autocomplete}
-              required
-              class={controlClass}
-            />
-          </div>
-        ))
-      }
-
-      <div class="sm:col-span-2">
-        <label for="message" class={labelClass}>
-          Message <span class="font-normal">(optional)</span>
-        </label>
-        <textarea id="message" name="message" rows="4" class={`${controlClass} resize-y`}
-        ></textarea>
-      </div>
+    <div class="sm:col-span-2">
+      <label for="message" class={labelClass}>
+        Message <span class="font-normal">(optional)</span>
+      </label>
+      <textarea id="message" name="message" rows="4" class={`${controlClass} resize-y`}
+      ></textarea>
     </div>
+  </div>
 
-    <button
-      type="submit"
-      data-submit
-      class="mt-5 rounded-full bg-ink px-5 py-[10px] font-sat text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-[background-color,transform] hover:bg-ink-hover active:scale-[0.98] disabled:cursor-default disabled:opacity-60 disabled:hover:bg-ink"
-    >
-      Send
-    </button>
+  <button
+    type="submit"
+    data-submit
+    class="mt-5 rounded-full bg-ink px-5 py-[10px] font-sat text-[14px] font-medium tracking-[-0.01em] text-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-[background-color,transform] hover:bg-ink-hover active:scale-[0.98] disabled:cursor-default disabled:opacity-60 disabled:hover:bg-ink"
+  >
+    Send
+  </button>
 
-    <!-- The outcome is carried by the words, not by colour: the palette is three
-         colours and a red error state would be a fourth. `ink`, not `muted` —
-         real text, and muted is 2.1:1 on the page.
+  <!-- The outcome is carried by the words, not by colour: the palette is three
+       colours and a red error state would be a fourth. `ink`, like all real
+       text on the page.
 
-         aria-live so the change is announced; it is in the DOM from the start,
-         empty, because a live region inserted at the same moment as its text is
-         not reliably announced. -->
-    <p
-      data-status
-      aria-live="polite"
-      class="mt-4 max-w-content font-sat text-[13px] leading-[1.45] tracking-[-0.01em] text-ink empty:mt-0"
-    >
-    </p>
-  </form>
-</section>
+       aria-live so the change is announced; it is in the DOM from the start,
+       empty, because a live region inserted at the same moment as its text is
+       not reliably announced. -->
+  <p
+    data-status
+    aria-live="polite"
+    class="mt-4 font-sat text-[13px] leading-[1.45] tracking-[-0.01em] text-ink empty:mt-0"
+  >
+  </p>
+</form>
 
 <script>
   const form = document.querySelector<HTMLFormElement>('form[data-notify]');

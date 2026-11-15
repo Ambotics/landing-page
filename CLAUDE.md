@@ -7,6 +7,7 @@ by `.github/workflows/deploy.yml` on every push to `main`.
 npm run dev        # http://localhost:4321
 npm run build      # static build into dist/
 npx astro check    # type-check .astro/.ts
+scripts/hero.sh <prefix>   # the hero's pictures, from the robot's renders (README, "The hero")
 ```
 
 ## Design system
@@ -23,7 +24,7 @@ This is the load-bearing rule when touching color:
   Things that respond to the visitor. It is never decoration. The CTA is filled with `ink`,
   not the accent: the blue owns the plane and the response states, and the control itself
   stays grayscale like everything else.
-- **Default to grayscale.** New components start in `page` / `ink` / `nav` / `muted`.
+- **Default to grayscale.** New components start in `page` / `ink` / `field`.
   Reach for `accent` only when the element genuinely does something.
 - **Don't add a second blue surface.** No blue-tinted photos, borders, dividers, or
   section backgrounds — a second blue halves the meaning of the first.
@@ -67,9 +68,11 @@ Full palette table and rationale: see **Design system** in `README.md`.
 corners and the A cut through it. The tile came back on 2026-11-01 as an app-icon-style
 badge; NOW-255 had dropped it. Earlier frames put the mark on a navy square, dropped
 because navy would be a second blue. The A is re-centred in the tile: the designer's frame
-sat it 17px right of centre. `Mark.astro` and `favicon.svg` carry the same shifted path.
-On the page the tile follows the wordmark (muted in the sidebar, white on the footer), and
-the A shows whatever is behind it. Off the page — favicon, apple-touch-icon,
+sat it 17px right of centre. `src/assets/mark.svg` and `favicon.svg` carry the same
+shifted path. `Mark.astro` draws the first, and so does the robot's render, for the tile on
+the robot's chest in the hero. On the page the tile is white on the footer, beside the
+wordmark, and the render's near-black on the hero's first screen; the A shows whatever is
+behind it. Off the page — favicon, apple-touch-icon,
 `og-image.png` — the badge is the footer's: a white tile with the A in `#185de4`. The
 favicon paints the A rather than cutting it, so it stays blue on any tab. On a white tab
 the tile itself disappears and only the A shows. `apple-touch-icon.png` is full-bleed
@@ -78,33 +81,31 @@ The tile is 0.9em and centred on Gabarito's 0.681em cap height (see `Wordmark.as
 resize it and the offset must be recomputed.
 
 **The wordmark is Gabarito 500, set in `Wordmark.astro`, not by its callers.** It was 600
-until 2026-09-30. 500 is also every heading's weight, so the sidebar lockup sits closer to
-the H1 and the solid mark weighs more against the letters; that was accepted. `og-image.png`
+until 2026-09-30. 500 is also every heading's weight. `og-image.png`
 bakes in the footer lockup: white on `#185de4`, Gabarito at 92px, centred in 1200×630. Change
 the weight or the mark and re-render the card.
 
 **The name carries no ™ anywhere** — not the lockup, the `<title>`, the meta tags, the
 social card or the docs.
 
-**Every heading goes through `SectionHeading.astro`.** The display face (Gabarito + `ss01`)
-carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
-body. Don't hand-roll a size or reach for `font-body` on a heading; add the class to the
-component so the scale stays in one file. `as="h3"` is there for a heading nested inside
-another section — the level changes, the treatment does not. Nothing uses it today; the page
-is one H1 and three h2s.
+**Every section goes through `Section.astro`.** It holds the page's three columns and the
+one heading treatment: the display face (Gabarito + `ss01`), the H1's own, at 30–36px
+against the H1's 48–72px and the 18px body. Don't hand-roll a size or reach for `font-body`
+on a heading; change the component so the scale stays in one file. The page is one H1, in
+`Hero.astro`, and three h2s.
 
 `font-ui` at 12px is now the *form label* style, not a heading style. It labels controls,
 which is a different job from titling a section.
 
-Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
-heading worded differently reads as the wrong destination. Change one, change the other.
-The `id`s are a separate contract with the scroll-spy and do not follow the copy (`starting`
-still points at the "Robots are changing" section).
+The section `id`s are anchors and do not follow the copy (`starting` is the "Robots are
+changing" section).
 
-**Anything that is real text must clear AA on the page, including qualifiers.** `nav`
-(`#808080`) is 3.59:1 on `page`, so it is only ever for the idle nav links, which darken to
-`ink` on hover and focus. The form's "(optional)" is set apart by weight rather than by
-dropping to `nav`, for exactly this reason.
+**Anything that is real text must clear AA on the page, including qualifiers.** A grey
+light enough to read as secondary does not: `#808080` is 3.59:1 on `page`. So all text is
+`ink`, and the form's "(optional)" is set apart by weight.
+
+**One filled button on the page: "Send".** The hero's "Get in touch" is a text link for
+that reason.
 
 **Naming IKEA, ABB, AstraZeneca or Universal Robots is a claim, so the wording is
 load-bearing.** The Applications copy says the team *has worked with* them — never "our customers",
@@ -118,13 +119,42 @@ back, the reasoning that took the longest to recover is in git: the marks were b
 own luminance — these four span 35–150 out of 255 — so a desaturated row reads as four
 different weights.
 
-## Gotchas
+## The hero
 
-- **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
-  `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
-  utility only because it scans the file and finds the bare string — rename the token or
-  the string and the active nav state silently stops working. Verify in the built CSS
-  (`grep text-ink dist/_astro/*.css`), not just by reading the source.
+Daniel's brief (NOW-318, 2026-11-15): an Apple-like page that starts on the logo; scrolling
+zooms out and the logo reveals itself on the chest of the actual robot from the mod repo;
+simple; after Apple and moving.parts. How it works is in README.md, "The hero".
+
+- **The zoom is drawn on a canvas, after three ways in the DOM failed** in Playwright's
+  browsers. One transform around all five pictures: Chromium rounds each picture's box to
+  whole pixels before the scale, and at a scale of 14 the tile's edge sat about 6px apart
+  in a picture and the closer one over it. Sizing the pictures each frame: sharp in
+  Chromium, coarse and jagged in WebKit. Each picture a layer of its own with a transform:
+  sharp in Chromium, coarse in WebKit once the zoom had run.
+- **The first screen's size is the chest cover's.** The cover's tile is
+  `max(24.2vw, 22.7svh)` wide: the tile is 30mm, and the 124 × 132mm of plain chest cover
+  around the mark has to fill the screen, else the shoulders show on the first screen. A
+  new chest cover or a moved mark needs both numbers measured again, off `chest.webp`.
+- **The cover's two colours are read off the render**, the cover's grey beside the tile and
+  the tile itself in `mark.webp`. Read them again after a new render.
+- **The `zooming` condition is written twice**, in `global.css` and in `Hero.astro`'s
+  script. The script cannot read it off the page: WebKit runs a module script before the
+  stylesheet is in. For the same reason the script measures in a `ResizeObserver`, never
+  once at the start.
+- **The pictures keep their transparency.** Laid on the page's colour and saved without
+  it, a closer picture showed as a faint rectangle: lossy WebP does not hold `#f4f4f4`
+  exactly.
+- **The canvas is never over 16 million pixels.** iOS draws nothing on a larger one.
+- **A headless browser says nothing about the zoom's speed.** Playwright's Chromium and
+  WebKit have no GPU here and take 100ms or more a frame.
+
+## State as of 2026-11-15
+
+- The hero is on a branch, not merged and not deployed. It was checked in Playwright's
+  Chromium and WebKit at 1440 × 900 and 390 × 844. It was not run in a real Safari, on a
+  phone, or on a slow machine.
+
+## Gotchas
 - **`public/CNAME` and `site` in `astro.config.mjs` must agree.** `CNAME` is what GitHub
   Pages reads; `site` builds the absolute canonical and OG URLs. To serve from
   `ambotics.github.io/landing-page` instead, delete `CNAME` and set `base: '/landing-page'`.
@@ -149,6 +179,7 @@ different weights.
 
 There are no tests. For anything that changes rendering, build and screenshot before
 claiming it works — `astro check` and a green build do not catch a color that didn't apply
-or a utility Tailwind never generated. Reading computed styles out of a real browser
+or a utility Tailwind never generated. Screenshot the hero in WebKit too, not only in
+Chromium: the two differ there (see "The hero"). Reading computed styles out of a real browser
 (`getComputedStyle`) is the reliable check; diffing full-page screenshots against the
 previous build catches unintended layout shifts.

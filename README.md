@@ -1,7 +1,8 @@
 # Ambotics — landing page
 
-A recreation of [ambotics.framer.website](https://ambotics.framer.website),
-built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub Pages.
+The page opens on the mark. Scrolling zooms out until the mark is the tile on the robot's
+chest. Built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub
+Pages.
 
 ## Develop
 
@@ -25,16 +26,19 @@ public/
   CNAME                   # custom domain for GitHub Pages
   og-image.png            # social card: the lockup, white on the accent (needs an absolute URL)
   favicon.{svg,ico}, apple-touch-icon.png  # the mark: accent A on a white tile
+scripts/hero.sh           # encodes the hero's pictures from the robot's renders
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
+    hero/                 # the hero's five pictures of the robot, and where each lies (zoom.json)
+    mark.svg              # the mark's drawing — read by Mark.astro and by the robot's render
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
     ContactForm.astro     # name / email / company / message, posted to Web3Forms
     Footer.astro          # accent-blue footer with grain overlay
-    Mark.astro            # the "A" knocked out of a currentColor tile — sits in the wordmark lockup
-    SectionHeading.astro  # the one heading treatment — display face, 20px
-    Sidebar.astro         # logo, section nav, scroll-spy
-    Wordmark.astro        # mark + "Ambotics" lockup, shared by header and footer
+    Hero.astro            # the mark, the zoom out to the robot, the H1
+    Mark.astro            # the "A" knocked out of a currentColor tile
+    Section.astro         # a section: heading in the first column, copy in the other two
+    Wordmark.astro        # mark + "Ambotics" lockup, in the footer
   data/applications.ts    # carousel entries (label + image)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
@@ -61,8 +65,8 @@ grayscale-default rule applied to the most important control on the page: it ear
 attention through weight, not hue, and the blue stays on the plane behind it and the focus
 ring around it.
 
-Everything else stays in a plain grayscale — `#f4f4f4` page, `#2b2b2b` copy, gray nav —
-so the blue never has to compete for attention. When you add a component, the default is
+Everything else stays in a plain grayscale — `#f4f4f4` page, `#2b2b2b` copy — so the
+blue never has to compete for attention. The robot in the hero is grayscale too. When you add a component, the default is
 grayscale; reach for the accent only if the element genuinely does something.
 
 Two practical consequences:
@@ -86,37 +90,26 @@ rather than being deleted.
 
 ### One heading treatment
 
-Every heading renders through `SectionHeading.astro` in the display face — Gabarito with
-`ss01`, the H1's own treatment — so the page reads as one typographic voice and size alone
-establishes the hierarchy:
+Every heading is set in the display face — Gabarito with `ss01` — so the page reads as
+one typographic voice and size alone establishes the hierarchy. The H1 is in `Hero.astro`.
+Every section heading renders through `Section.astro`, which also holds the page's three
+columns, so headings and copy line up from one section to the next:
 
-| Level                       | Size                    | Face                    |
-| --------------------------- | ----------------------- | ----------------------- |
-| H1                          | `clamp(28px,5vw,32px)`  | Gabarito `ss01`, 500    |
-| Heading (`h2`, `h3`)        | 20px                    | Gabarito `ss01`, 500    |
-| Body                        | 14px                    | Inter, 460              |
-| Form label                  | 12px                    | Instrument Sans, 500    |
+| Level                | Size                               | Face                 |
+| -------------------- | ---------------------------------- | -------------------- |
+| H1                   | 48px, 60px from `sm`, 72px from `lg` | Gabarito `ss01`, 500 |
+| Section heading (h2) | 30px, 36px from `sm`               | Gabarito `ss01`, 500 |
+| Body                 | 18px on a 32px line                | Inter, 460           |
+| Form label           | 12px                               | Instrument Sans, 500 |
 
-20px was picked by measuring, not by ratio arithmetic. At 18px the heading reads as a
-bolded first line of the paragraph beneath it rather than as a heading; 20px separates
-cleanly and lands the h2/h1 ratio at 0.63, alongside the 0.65 of the reference page this
-layout follows.
+The page is one H1 and three h2s. The section `id`s are anchors and do not track the
+copy: `#starting` is the section headed "Robots are changing".
 
-`as="h3"` drops the level without changing the look, for a heading nested inside another
-section, so the outline can stay honest while the page keeps one heading treatment. Nothing
-uses it today — the page is one H1 and three h2s.
+### Real text is ink
 
-Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
-heading with different wording reads as the wrong destination. The section `id`s are a
-separate contract with the scroll-spy and deliberately do not track the copy: `#starting`
-still points at the section now headed "Robots are changing".
-
-### `nav` is not for words
-
-`#808080` on the page background is 3.59:1 — under AA. It is fine for the idle sidebar
-links, which darken to `ink` on hover and focus. It is not fine for anything a visitor has
-to read, and that includes small qualifiers: the contact form's "(optional)" is separated
-from its label by weight, not by dropping to `nav`.
+Anything a visitor has to read is `ink`, small qualifiers included: the contact form's
+"(optional)" is separated from its label by weight, not by a lighter grey. A grey light
+enough to read as secondary does not clear AA on the page: `#808080` is 3.59:1.
 
 ### Naming companies is a claim
 
@@ -156,17 +149,49 @@ Edit these in the `@theme` block of `src/styles/global.css`; every utility follo
 | Token                  | Value     | Used for                                              |
 | ---------------------- | --------- | ----------------------------------------------------- |
 | `--color-page`         | `#f4f4f4` | Page background                                       |
-| `--color-ink`          | `#2b2b2b` | Headings, body copy, active/hover nav, CTA fill       |
+| `--color-ink`          | `#2b2b2b` | Headings, body copy, CTA fill                         |
 | `--color-ink-hover`    | `#3d3d3d` | CTA hover                                             |
 | `--color-accent`       | `#185de4` | Footer background, focus rings, selection             |
 | `--color-accent-hover` | `#1450c4` | Reserved — no blue-filled control on the page today   |
-| `--color-muted`        | `#a8a8a8` | Wordmark                                              |
-| `--color-nav`          | `#808080` | Idle nav links                                        |
 | `--color-field`        | `#ededed` | Form field background                                 |
 
-Note the scroll-spy in `Sidebar.astro` toggles the literal class `text-ink` from
-JavaScript — Tailwind picks it up by scanning the file, so renaming the token means
-updating that string too.
+## The hero
+
+The page opens on the mark. Scrolling zooms out, and the mark turns out to be the tile on
+the robot's chest. The headline then comes in over the robot, and the page scrolls on down
+the robot to its base.
+
+- **One camera, five pictures.** `src/assets/hero/` holds the whole robot and four squares
+  about the mark (`torso`, `chest`, `mark`, `tile`), each 2400px on its longer side, all
+  through one camera with a zoom lens. `zoom.json` gives each picture's place in mm on the
+  mark's plane, from the mark's centre. Laid over each other they are one picture that is
+  sharp at every zoom, from 1.5px per mm for the whole robot to 48 for the tile. Together
+  they are 412 kB.
+- **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
+  no script. The script draws the zoom on a canvas while the visitor scrolls through the
+  260svh of `[data-travel]`, and hands over to the picture in the page once the robot is at
+  rest. Without scripts, or with "reduce motion" on, there is no travel, the page is the
+  resting state and only the whole robot's picture is fetched (the `zooming` variant in
+  `global.css`).
+- **The first screen is CSS too.** A cover draws the mark on the chest cover's grey at the
+  size the zoom starts from, so the page opens on the mark before a picture has loaded. Its
+  two colours, `#d6d7d5` and `#2c2e2f`, are the render's, read off `mark.webp`; they are
+  not in the palette.
+- **The robot is the one in `Ambotics/open_arm-mods`** (private): `full_robot/`, the robot
+  to build. Its tile is drawn from `src/assets/mark.svg` here, so the mark on the chest is
+  the page's own.
+
+To render the pictures again, in a checkout of `open_arm-mods` with
+`full_robot/robot_325_posed.glb` built as its `full_robot/README.md` says:
+
+```sh
+tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup \
+    --python full_robot/shade.py -- full_robot/robot_325_posed.glb <out>/hero zoom \
+    --samples 512 --zoom-px 2400 --mark-svg <this repo>/src/assets/mark.svg    # 6 min
+```
+
+Then here, `scripts/hero.sh <out>/hero` fades each picture's edges, encodes it into
+`src/assets/hero/` and copies `zoom.json`: 5 min from an agent's shell.
 
 ## How it's built
 
@@ -176,12 +201,14 @@ updating that string too.
   `text-ink`, `font-display`, `max-w-content`, and friends.
 - **Fonts** from Google Fonts — `Gabarito` (display/logo), `Inter` (body),
   `Instrument Sans` (UI labels) — plus `Satoshi` from Fontshare for the form.
-- **Images** go through `astro:assets`, which emits responsive WebP at 583w/1166w.
-  This takes the carousel from ~3.4 MB of JPEG down to ~180 KB.
-- **Layout** — a left sidebar (logo + section nav) beside a content column on desktop;
-  a single column on mobile with the nav hidden.
-- **Scripts** — the carousel arrows and the nav scroll-spy are plain `<script>` tags in
-  their components; Astro bundles and inlines them. No client-side framework.
+- **Images** — the carousel's go through `astro:assets`, which emits responsive WebP at
+  583w/1166w. This takes the carousel from ~3.4 MB of JPEG down to ~180 KB. The hero's
+  pictures are encoded by `scripts/hero.sh` and served as they are.
+- **Layout** — the hero across the page, then three sections on one three-column grid:
+  heading in the first column, copy in the other two; a single column below `lg`.
+- **Scripts** — the hero's zoom, the carousel arrows and the contact form are plain
+  `<script>` tags in their components; Astro bundles and inlines them. No client-side
+  framework.
 
 ## Deploying
 

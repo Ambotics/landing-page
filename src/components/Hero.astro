@@ -1,0 +1,257 @@
+---
+// The hero: the page opens on the mark, and scrolling zooms out until the mark
+// is the tile on the robot's chest, with the headline over the robot.
+//
+// The robot is five pictures from one camera with a zoom lens: the whole robot,
+// then squares about the mark down to its tile. `zoom.json` says where each lies,
+// in mm on the mark's plane from the mark's centre, so laid over each other they
+// are one picture that stays sharp from the tile out to the robot. Both come from
+// the robot's own render script (see "The hero" in README.md).
+//
+// CSS lays out the resting state: headline, then the whole robot. The script
+// only draws the zoom while the visitor scrolls through [data-travel], so
+// without scripts, or where the visitor asked for less motion (the `zooming`
+// variant in global.css), the page is the resting state.
+import type { ImageMetadata } from 'astro';
+import Mark from './Mark.astro';
+import zoom from '../assets/hero/zoom.json';
+
+const pictures = import.meta.glob<{ default: ImageMetadata }>('../assets/hero/*.webp', {
+  eager: true,
+});
+
+const [frame] = zoom.levels; // the whole robot
+const sources = zoom.levels.map(({ name }) => pictures[`../assets/hero/${name}.webp`].default);
+---
+
+<section data-hero>
+  <div data-stage class="sticky top-0 overflow-hidden pb-16">
+    <!-- The zoom is drawn here until the robot is at rest. A canvas because
+         browsers disagree on scaling pictures this far (see "The hero" in
+         CLAUDE.md). A screen and a half high: the first screen, and what
+         scrolls into view while the zoom catches up with a fast scroll past its
+         end. `lvh` so that holds on a phone once the toolbar has slid away. -->
+    <canvas
+      data-canvas
+      data-pictures={JSON.stringify(sources.map(({ src }) => src))}
+      class="pointer-events-none absolute top-0 left-0 hidden h-[150lvh] w-full zooming:block"
+      aria-hidden="true"></canvas>
+
+    <!-- The first screen. The cover is the mark on the chest cover's grey, drawn
+         by CSS at the size the zoom starts from, so the page opens on the mark
+         before any picture has loaded; the script reads that size off it. The
+         tile spans 30 of the 124 × 132 mm of plain cover around the mark, and
+         that patch has to fill the screen: 30/124 of the width, 30/132 of the
+         height, whichever is larger. -->
+    <div data-view class="pointer-events-none absolute inset-x-0 top-0 z-20 hidden h-svh zooming:block">
+      <div
+        data-cover
+        class="absolute inset-0 grid place-items-center bg-[#d6d7d5] transition-opacity duration-500"
+      >
+        <Mark class="w-[max(24.2vw,22.7svh)] text-[#2c2e2f]" />
+      </div>
+      <p
+        data-cue
+        class="absolute inset-x-0 bottom-8 text-center font-ui text-sm font-medium tracking-[-0.01em] text-ink"
+      >
+        Scroll
+        <span class="scroll-cue mx-auto mt-2 block h-8 w-px bg-ink"></span>
+      </p>
+    </div>
+
+    <div
+      data-reveal
+      class="relative z-10 mx-auto max-w-6xl px-6 pt-24 text-center zooming:opacity-0 sm:pt-32 lg:px-10"
+    >
+      <h1
+        class="mx-auto max-w-[20ch] font-display ss01 text-5xl font-medium tracking-tight text-balance text-ink sm:text-6xl lg:text-7xl"
+      >
+        A new kind of robotics company.
+      </h1>
+      <p class="mt-6 text-lg">
+        <a
+          href="#contact"
+          class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+        >
+          Get in touch
+        </a>
+      </p>
+    </div>
+
+    <!-- The robot at rest, in the whole robot's frame. Wider than a phone's
+         screen on purpose: the frame's margins are empty, and the robot itself
+         then spans most of the screen. While the zoom runs the canvas draws the
+         robot and this picture is transparent. -->
+    <img
+      data-robot
+      src={sources[0].src}
+      width={sources[0].width}
+      height={sources[0].height}
+      alt="A two-armed robot on a lifting column and a wheeled base, the Ambotics mark on its chest."
+      decoding="sync"
+      draggable="false"
+      class="relative left-1/2 -mt-6 aspect-(--frame) w-[min(125vw,78svh)] max-w-none -translate-x-1/2 select-none zooming:opacity-0"
+      style={`--frame:${frame.w}/${frame.h}`}
+    />
+  </div>
+
+  <!-- How far the visitor scrolls while the stage above stays put and zooms. -->
+  <div data-travel class="hidden h-[260svh] zooming:block" aria-hidden="true"></div>
+</section>
+
+<script>
+  import { mark, levels as fields } from '../assets/hero/zoom.json';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const part = <T extends HTMLElement = HTMLElement>(name: string) =>
+    hero!.querySelector<T>(`[data-${name}]`)!;
+
+  // The `zooming` variant's condition, from global.css: where it does not hold,
+  // the page stays at rest. Asked of the browser, not read off the page: Safari
+  // runs this before the stylesheet is in.
+  const zooming = '(prefers-reduced-motion: no-preference) and (scripting: enabled)';
+
+  if (hero && matchMedia(zooming).matches) {
+    const stage = part('stage');
+    const canvas = part<HTMLCanvasElement>('canvas');
+    const view = part('view');
+    const cover = part('cover');
+    const cue = part('cue');
+    const reveal = part('reveal');
+    const robot = part('robot');
+    const travel = part('travel');
+    const tile = cover.querySelector('svg')!;
+    const context = canvas.getContext('2d')!;
+    const [frame] = fields;
+
+    const clamp = (n: number) => Math.min(Math.max(n, 0), 1);
+    // Fast off the mark, slow onto the robot.
+    const ease = (p: number) => 1 - (1 - p) ** 1.5;
+
+    // All in CSS px, from the stage's top left corner.
+    let rest = 1; // px per mm at rest
+    let x = 0; // the mark's centre at rest
+    let y = 0;
+    let start = 1; // how many times larger the zoom starts
+    let dx = 0; // from the mark at rest to the middle of the first screen
+    let dy = 0;
+    let ratio = 1; // canvas px per CSS px
+
+    const measure = () => {
+      const s = stage.getBoundingClientRect();
+      const r = robot.getBoundingClientRect();
+      rest = r.width / frame.w;
+      x = r.left - s.left - frame.x * rest;
+      y = r.top - s.top - frame.y * rest;
+      start = tile.getBoundingClientRect().width / mark / rest;
+      dx = view.offsetWidth / 2 - x;
+      dy = view.offsetHeight / 2 - y;
+      // No more than 16 million pixels: iOS draws nothing on a larger canvas.
+      ratio = Math.min(devicePixelRatio, Math.sqrt(16e6 / (canvas.clientWidth * canvas.clientHeight)));
+      canvas.width = canvas.clientWidth * ratio;
+      canvas.height = canvas.clientHeight * ratio;
+    };
+
+    const draw = (p: number) => {
+      const arrived = clamp((p - 0.85) / 0.15);
+      reveal.style.opacity = String(arrived);
+      reveal.style.transform = `translateY(${(1 - arrived) * 16}px)`;
+      cue.style.opacity = String(1 - clamp(p / 0.03));
+
+      // At rest the picture in the page takes over: it reaches to the robot's
+      // feet, the canvas does not.
+      robot.style.opacity = p === 1 ? '1' : '0';
+      canvas.style.visibility = p === 1 ? 'hidden' : 'visible';
+      if (p === 1) return;
+
+      const scale = start ** (1 - ease(p));
+      // The mark moves to its resting place in step with the scale: one zoom
+      // about one point of the screen, not a zoom and a pan.
+      const moved = start === 1 ? 0 : (scale - 1) / (start - 1);
+      const px = rest * scale; // per mm
+      const left = x + dx * moved; // the mark's centre
+      const top = y + dy * moved;
+
+      // How much of each picture shows. A closer one comes in once the one
+      // under it would be stretched.
+      const shown = pictures.map((picture, i) => {
+        if (!picture.naturalWidth) return 0;
+        if (!i) return 1;
+        const under = pictures[i - 1].naturalWidth / fields[i - 1].w; // its px per mm
+        return clamp(((px * ratio) / under - 1) / 0.4);
+      });
+      // What a picture hides is not drawn: one that shows in full and fills the
+      // canvas inside its faded edge. The edge is 6% a side; 8% is left out.
+      const { clientWidth, clientHeight } = canvas;
+      const fills = (i: number) => {
+        const { x, y, w, h } = fields[i];
+        return (
+          shown[i] === 1 &&
+          left + (x + 0.08 * w) * px <= 0 &&
+          top + (y + 0.08 * h) * px <= 0 &&
+          left + (x + 0.92 * w) * px >= clientWidth &&
+          top + (y + 0.92 * h) * px >= clientHeight
+        );
+      };
+      const lowest = Math.max(0, shown.findLastIndex((_, i) => fills(i)));
+
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, clientWidth, clientHeight);
+      pictures.slice(lowest).forEach((picture, n) => {
+        const i = lowest + n;
+        if (!shown[i]) return;
+        const { x, y, w, h } = fields[i];
+        context.globalAlpha = shown[i];
+        context.drawImage(picture, left + x * px, top + y * px, w * px, h * px);
+      });
+    };
+
+    const scrolled = () =>
+      clamp(-hero.getBoundingClientRect().top / (travel.offsetHeight || 1));
+
+    // The zoom follows the scroll a few frames behind, so a mouse wheel's steps
+    // come out as one movement. It closes in faster past the end of the travel:
+    // the stage then scrolls on, and the canvas stops half a screen further down.
+    let p = 0;
+    let frameId = 0;
+    const follow = () => {
+      const to = scrolled();
+      p += (to - p) * (to === 1 ? 0.5 : 0.25);
+      if (Math.abs(to - p) < 0.0005) p = to;
+      draw(p);
+      frameId = p === to ? 0 : requestAnimationFrame(follow);
+    };
+    addEventListener(
+      'scroll',
+      () => {
+        frameId ||= requestAnimationFrame(follow);
+      },
+      { passive: true }
+    );
+
+    // The resting state moves when the screen is resized, when the stylesheet
+    // comes in and when the headline's font does. The observer also runs once
+    // at the start.
+    const resting = new ResizeObserver(() => {
+      measure();
+      p = scrolled();
+      draw(p);
+    });
+    resting.observe(stage);
+    resting.observe(view);
+
+    // The pictures, each drawn as soon as it is in. The cover goes once the
+    // closer ones are: the first screen is theirs.
+    const sources: string[] = JSON.parse(canvas.dataset.pictures!);
+    const pictures = sources.map((src) => Object.assign(new Image(), { src }));
+    const loaded = pictures.map((picture) =>
+      picture.decode().then(
+        () => draw(p),
+        () => {}
+      )
+    );
+    Promise.all(loaded.slice(1)).then(() => {
+      cover.style.opacity = '0';
+    });
+  }
+</script>
