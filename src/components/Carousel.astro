@@ -10,18 +10,24 @@ import { applications } from '../data/applications';
 // would centre on heading-plus-copy-plus-track and ride low. This element is
 // still full content width — the bleed is a negative margin on #carousel itself
 // — so the buttons' left/right offsets are unaffected.
+//
+// `track` is that bleed: how the track runs out past this element on the right,
+// and the padding that stops the last card short of the edge. The default is
+// /'s, out through the page's own padding. On /v2-preview this element already
+// ends at the screen's edge, so that page passes the padding alone.
 interface Props {
   class?: string;
+  track?: string;
 }
 
-const { class: className = '' } = Astro.props;
+const {
+  class: className = '',
+  track = '-mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]',
+} = Astro.props;
 ---
 
 <div class:list={['group/carousel relative', className]}>
-  <div
-    id="carousel"
-    class="carousel flex gap-[10px] overflow-x-auto -mr-6 sm:-mr-10 lg:-mr-[84px] pr-6 sm:pr-10 lg:pr-[84px]"
-  >
+  <div id="carousel" class:list={['carousel flex gap-[10px] overflow-x-auto', track]}>
     {
       applications.map(({ label, image }) => (
         <figure class="relative shrink-0 w-[clamp(280px,80vw,583px)] aspect-[583/365] overflow-hidden rounded-xl">

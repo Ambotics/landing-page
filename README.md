@@ -3,6 +3,10 @@
 A recreation of [ambotics.framer.website](https://ambotics.framer.website),
 built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub Pages.
 
+The next page is live for sign-off at [`/v2-preview`](https://ambotics.com/v2-preview/):
+it opens on the mark and zooms out onto the robot. See **/v2-preview** below. Everything
+else in this file describes `/`.
+
 ## Develop
 
 ```bash
@@ -25,19 +29,25 @@ public/
   CNAME                   # custom domain for GitHub Pages
   og-image.png            # social card: the lockup, white on the accent (needs an absolute URL)
   favicon.{svg,ico}, apple-touch-icon.png  # the mark: accent A on a white tile
+scripts/hero.sh           # /v2-preview: encodes the hero's pictures from the robot's renders
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
+    hero/                 # /v2-preview: the hero's pictures of the robot, and where each lies (zoom.json)
+    mark.svg              # the mark's drawing — read by Mark.astro and by the robot's render
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
     ContactForm.astro     # name / email / company / message, posted to Web3Forms
     Footer.astro          # accent-blue footer with grain overlay
+    Hero.astro            # /v2-preview: the mark, the zoom out to the robot, the H1
     Mark.astro            # the "A" knocked out of a currentColor tile — sits in the wordmark lockup
+    Section.astro         # /v2-preview: a section, heading in the first column, copy in the other two
     SectionHeading.astro  # the one heading treatment — display face, 20px
     Sidebar.astro         # logo, section nav, scroll-spy
     Wordmark.astro        # mark + "Ambotics" lockup, shared by header and footer
   data/applications.ts    # carousel entries (label + image)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
+  pages/v2-preview.astro  # the next page, live for sign-off
   styles/global.css       # Tailwind import, @theme tokens, grain overlay
 .github/workflows/deploy.yml
 ```
@@ -168,6 +178,74 @@ Note the scroll-spy in `Sidebar.astro` toggles the literal class `text-ink` from
 JavaScript — Tailwind picks it up by scanning the file, so renaming the token means
 updating that string too.
 
+## /v2-preview
+
+The next landing page, live at `/v2-preview` for sign-off before it replaces `/`. No page
+links to it and it carries `noindex`. It has the copy, the carousel, the contact form and
+the footer of `/`. Its hero and its layout are its own: no sidebar, and three sections on
+one three-column grid, heading in the first column and copy in the other two. The carousel
+runs on to the right edge of the screen.
+
+| Level                | Size                                 | Face                 |
+| -------------------- | ------------------------------------ | -------------------- |
+| H1                   | 48px, 60px from `sm`, 72px from `lg` | Gabarito `ss01`, 500 |
+| Section heading (h2) | 30px, 36px from `sm`                 | Gabarito `ss01`, 500 |
+| Body                 | 18px on a 32px line                  | Inter, 460           |
+
+### The hero
+
+The page opens on the mark. Scrolling zooms out, and the mark turns out to be the tile on
+the robot's chest. The head comes into view looking at the visitor, then turns down to the
+robot's hands. The headline comes in over the robot, and the page scrolls on down the robot
+to its base.
+
+- **One camera, five pictures.** `src/assets/hero/` holds the whole robot and four squares
+  about the mark (`torso`, `chest`, `mark`, `tile`), each 2400px on its longer side, all
+  through one camera with a zoom lens. `zoom.json` gives each picture's place in mm on the
+  mark's plane, from the mark's centre. Laid over each other they are one picture that is
+  sharp at every zoom, from 1.5px per mm for the whole robot to 48 for the tile.
+- **The head is pictures of its own**, through the same camera: `head.webp` has it level
+  with the camera, and `head/00.webp` to `head/31.webp` bring it down 62 degrees, 2 a
+  picture, to where the five pictures have it. The page draws one of them over the five.
+- **888 kB in all.** The five pictures are 411 kB and the head's are 477 kB. The head's
+  32 are fetched once the first screen is up.
+- **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
+  no script. The script draws the zoom on a canvas while the visitor scrolls through the
+  260svh of `[data-travel]`, and hands over to the picture in the page once the robot is at
+  rest. Without scripts, or with "reduce motion" on, there is no travel, the page is the
+  resting state and only the whole robot's picture is fetched (the `zooming` variant in
+  `global.css`).
+- **The first screen is CSS too.** A cover draws the mark on the chest cover's grey at the
+  size the zoom starts from, so the page opens on the mark before a picture has loaded. Its
+  two colours, `#d6d7d5` and `#2c2e2f`, are the render's, read off `mark.webp`; they are
+  not in the palette.
+- **The robot is the one in `Ambotics/open_arm-mods`** (private): `full_robot/`, the robot
+  to build. Its tile is drawn from `src/assets/mark.svg` here, so the mark on the chest is
+  the page's own.
+
+To render the pictures again, in a checkout of `open_arm-mods` with
+`full_robot/robot_325_posed.glb` built as its `full_robot/README.md` says:
+
+```sh
+tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup \
+    --python full_robot/shade.py -- full_robot/robot_325_posed.glb <out>/hero zoom \
+    --samples 512 --zoom-px 2400 --zoom-head 62 32 \
+    --mark-svg <this repo>/src/assets/mark.svg    # about 20 min
+```
+
+62 is the neck's home tilt: that far up, the head is level. Then here,
+`scripts/hero.sh <out>/hero` fades each picture's edges, encodes it into
+`src/assets/hero/` and copies `zoom.json`: 2 min when it runs outside the agent's
+background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
+
+### When it replaces /
+
+`index.astro` takes `v2-preview.astro`'s content and `v2-preview.astro` goes, with its
+`noindex`. `Sidebar.astro` and `SectionHeading.astro` go, and with them the `muted` and
+`nav` tokens and the default of `Carousel.astro`'s `track`. This file and `CLAUDE.md` then
+describe one page: commit `f409c79`, the first of the pull request that added
+`/v2-preview`, has both as they read for that page alone.
+
 ## How it's built
 
 - **Tailwind v4** via `@tailwindcss/vite`. The old inline `tailwind.config` object now lives
@@ -180,8 +258,9 @@ updating that string too.
   This takes the carousel from ~3.4 MB of JPEG down to ~180 KB.
 - **Layout** — a left sidebar (logo + section nav) beside a content column on desktop;
   a single column on mobile with the nav hidden.
-- **Scripts** — the carousel arrows and the nav scroll-spy are plain `<script>` tags in
-  their components; Astro bundles and inlines them. No client-side framework.
+- **Scripts** — the carousel arrows, the nav scroll-spy, the contact form and
+  `/v2-preview`'s hero are plain `<script>` tags in their components; Astro bundles and
+  inlines them. No client-side framework.
 
 ## Deploying
 

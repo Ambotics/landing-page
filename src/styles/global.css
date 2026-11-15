@@ -31,6 +31,15 @@
   --container-content: 600px;
 }
 
+/* /v2-preview's hero zooms out of the mark only where motion is welcome and
+   scripts run. Everywhere else that page is its resting state. Hero.astro's
+   script asks the browser the same question: change one, change the other. */
+@custom-variant zooming {
+  @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+    @slot;
+  }
+}
+
 :root {
   color-scheme: light;
 }
@@ -48,6 +57,24 @@ body {
 .body-copy {
   font-variation-settings: 'opsz' 14, 'wght' 460;
   font-weight: 460;
+}
+
+/* The line under "Scroll" on /v2-preview's first screen draws itself downwards, again and again. */
+.scroll-cue {
+  transform-origin: top;
+  animation: scroll-cue 2s ease-in-out infinite;
+}
+@keyframes scroll-cue {
+  0% {
+    transform: scaleY(0);
+  }
+  60%,
+  100% {
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Carousel: horizontal scroll with snap, scrollbar hidden */
