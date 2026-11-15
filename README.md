@@ -197,7 +197,7 @@ runs on to the right edge of the screen.
 The page opens on the mark. Scrolling zooms out, and the mark turns out to be the tile on
 the robot's chest. The head comes into view looking down at the robot's hands, then lifts
 to look straight at the visitor. The headline comes in over the robot, and the page scrolls
-on down the robot to its base.
+on down the robot to its base. At rest the head turns after the visitor's pointer.
 
 - **One camera, five pictures.** `src/assets/hero/` holds the whole robot and four squares
   about the mark (`torso`, `chest`, `mark`, `tile`), each 2400px on its longer side, all
@@ -209,8 +209,17 @@ on down the robot to its base.
   picture, to where the five pictures have it: level, looking at the visitor. The page
   draws one of them over the five. The camera's lenses are domes of dark glass, so they
   catch the lights as the head lifts.
-- **924 kB in all.** The five pictures are 431 kB and the head's are 493 kB. The head's
-  32 are fetched once the first screen is up.
+- **The head follows the pointer** once the robot is at rest. `look/00.webp` to
+  `look/09.webp` have it looking around from level: a look every 5 degrees, 40 to either
+  side, 20 up and 25 down, 17 side by side in a picture for each height. The page takes the
+  pointer to hang 700mm in front of the robot and turns the head to the nearest look, most
+  of the way in a fifth of a second. On the way it blends the looks around it; it stops on
+  one. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
+  robot can take.
+- **924 kB for every visitor, 549 kB more for one with a mouse.** The five pictures are
+  431 kB and the head's lift is 493 kB. The lift's 32 are fetched once the first screen is
+  up. The looks come after them, and only once a mouse moves or a wheel turns: a phone
+  never fetches them.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
   no script. The script draws the zoom on a canvas while the visitor scrolls through the
   260svh of `[data-travel]`, and hands over to the picture in the page once the robot is at
@@ -234,14 +243,17 @@ To render the pictures again, in a checkout of `open_arm-mods` with
 ```sh
 tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup \
     --python full_robot/shade.py -- full_robot/robot_325_posed.glb <out>/hero zoom \
-    --samples 512 --zoom-px 2400 --zoom-head 62 32 --mark-blue \
-    --mark-svg <this repo>/src/assets/mark.svg    # about 20 min
+    --samples 512 --zoom-px 2400 --zoom-head 62 32 --zoom-look 40 20 25 5 --mark-blue \
+    --mark-svg <this repo>/src/assets/mark.svg
 ```
 
 62 is the neck's home tilt: that far up, the head is level, and that is where the five
-pictures have it. Then here,
+pictures have it. `--zoom-look` adds the 170 looks. The five pictures and the lift take
+about 20 min. A look is a small picture and still takes Blender 20 s or more, so the looks
+were rendered apart, a row to a Blender and all ten at once: add `--zoom-only '^look_03_'`
+for row 03 alone. That took 14 min. Then here,
 `scripts/hero.sh <out>/hero` moves the tile to the accent, fades each picture's edges,
-encodes it into `src/assets/hero/` and copies `zoom.json`: 2 min when it runs outside the agent's
+encodes it into `src/assets/hero/` and copies `zoom.json`: 3 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
 
 ### When it replaces /

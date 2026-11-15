@@ -9,8 +9,9 @@
 // in mm on the mark's plane from the mark's centre, so laid over each other they
 // are one picture that stays sharp from the tile out to the robot. The head is
 // pictures of its own through the same camera: looking down, then lifting to
-// where the five have it, level. All come from the robot's own render script
-// (see "The hero" in README.md).
+// where the five have it, level, and from there looking around, for the head
+// to turn after the visitor's pointer once the robot is at rest. All come from
+// the robot's own render script (see "The hero" in README.md).
 //
 // CSS lays out the resting state: headline, then the whole robot. The script
 // only draws the zoom while the visitor scrolls through [data-travel], so
@@ -35,6 +36,8 @@ const sources = {
   frames: Array.from({ length: zoom.head.frames }, (_, i) =>
     picture(`head/${String(i).padStart(2, '0')}`).src
   ),
+  // the head looking around: a picture for each row of looks, the highest first
+  looks: zoom.look.ups.map((_, i) => picture(`look/${String(i).padStart(2, '0')}`).src),
 };
 ---
 
@@ -108,6 +111,11 @@ const sources = {
       class="relative left-1/2 -mt-6 aspect-(--frame) w-[min(125vw,78svh)] max-w-none -translate-x-1/2 select-none zooming:opacity-0"
       style={`--frame:${frame.w}/${frame.h}`}
     />
+
+    <!-- The head at rest, turned after the visitor's pointer: a look of the
+         head, drawn over the robot's own. The script puts it there. -->
+    <canvas data-look class="pointer-events-none absolute hidden zooming:block" aria-hidden="true"
+    ></canvas>
   </div>
 
   <!-- How far the visitor scrolls while the stage above stays put and zooms. -->
@@ -115,7 +123,12 @@ const sources = {
 </section>
 
 <script>
-  import { mark, levels as fields, head as headField } from '../assets/hero/zoom.json';
+  import {
+    mark,
+    levels as fields,
+    head as headField,
+    look as lookField,
+  } from '../assets/hero/zoom.json';
 
   const hero = document.querySelector<HTMLElement>('[data-hero]');
   const part = <T extends HTMLElement = HTMLElement>(name: string) =>
@@ -134,9 +147,11 @@ const sources = {
     const cue = part('cue');
     const reveal = part('reveal');
     const robot = part('robot');
+    const headCanvas = part<HTMLCanvasElement>('look');
     const travel = part('travel');
     const tile = cover.querySelector('svg')!;
     const context = canvas.getContext('2d')!;
+    const headContext = headCanvas.getContext('2d')!;
     const [frame] = fields;
 
     const clamp = (n: number) => Math.min(Math.max(n, 0), 1);
@@ -148,6 +163,9 @@ const sources = {
       const t = clamp((p - 0.55) / 0.4);
       return t * t * (3 - 2 * t);
     };
+    // From there it turns after the pointer, all the way once the robot is at
+    // rest.
+    const turned = (p: number) => clamp((p - 0.95) / 0.05);
 
     // All in CSS px, from the stage's top left corner.
     let rest = 1; // px per mm at rest
@@ -157,6 +175,7 @@ const sources = {
     let dx = 0; // from the mark at rest to the middle of the first screen
     let dy = 0;
     let ratio = 1; // canvas px per CSS px
+    let page = ''; // the page's colour
 
     const measure = () => {
       const s = stage.getBoundingClientRect();
@@ -171,6 +190,77 @@ const sources = {
       ratio = Math.min(devicePixelRatio, Math.sqrt(16e6 / (canvas.clientWidth * canvas.clientHeight)));
       canvas.width = canvas.clientWidth * ratio;
       canvas.height = canvas.clientHeight * ratio;
+      // The head at rest lies over the robot's own, as sharp as the screen.
+      page = getComputedStyle(document.body).backgroundColor;
+      const { style } = headCanvas;
+      style.left = `${x + lookField.x * rest}px`;
+      style.top = `${y + lookField.y * rest}px`;
+      style.width = `${lookField.w * rest}px`;
+      style.height = `${lookField.h * rest}px`;
+      headCanvas.width = Math.round(lookField.w * rest * devicePixelRatio);
+      headCanvas.height = Math.round(lookField.h * rest * devicePixelRatio);
+    };
+
+    // Where the head looks, in degrees to the right and up from straight ahead.
+    const gaze = { pan: 0, up: 0 };
+    // The head as it looks that way. There is a look every few degrees.
+    // Between four of them the head is all four, each as much as it is near;
+    // it comes to rest on one.
+    const blend = document.createElement('canvas');
+    const blended = blend.getContext('2d')!;
+    const look = (pan: number, up: number) => {
+      const { pans, ups } = lookField;
+      const column = (pan - pans[0]) / (pans[1] - pans[0]);
+      const row = (ups[0] - up) / (ups[0] - ups[1]);
+      const c = Math.min(Math.floor(column), pans.length - 2);
+      const r = Math.min(Math.floor(row), ups.length - 2);
+      const side = looks[0].naturalWidth / pans.length;
+      blend.width = side; // which clears it too
+      blend.height = looks[0].naturalHeight;
+      // Added up, not laid over each other: the first would stay whole where
+      // the next is clear.
+      blended.globalCompositeOperation = 'lighter';
+      for (const [i, j] of [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ]) {
+        blended.globalAlpha = (i ? column - c : 1 - column + c) * (j ? row - r : 1 - row + r);
+        blended.drawImage(looks[r + j], (c + i) * side, 0, side, blend.height, 0, 0, side, blend.height);
+      }
+      return blend;
+    };
+
+    // A picture of the head goes over the robot's own head, with the mark's
+    // centre at left, top and px to the mm. That head goes first, from inside
+    // the picture's faded edge: the edge is 6% of the picture's longer side,
+    // and 8% is left. It is cleared, or painted over where it is not on this
+    // canvas.
+    const replace = (
+      onto: CanvasRenderingContext2D,
+      picture: CanvasImageSource,
+      { x, y, w, h }: { x: number; y: number; w: number; h: number },
+      left: number,
+      top: number,
+      px: number,
+      paint?: string
+    ) => {
+      const edge = 0.08 * Math.max(w, h);
+      const inside = [
+        left + (x + edge) * px,
+        top + (y + edge) * px,
+        (w - 2 * edge) * px,
+        (h - 2 * edge) * px,
+      ] as const;
+      if (paint) {
+        onto.fillStyle = paint;
+        onto.fillRect(...inside);
+      } else {
+        onto.clearRect(...inside);
+      }
+      onto.globalAlpha = 1;
+      onto.drawImage(picture, left + x * px, top + y * px, w * px, h * px);
     };
 
     const draw = (p: number) => {
@@ -183,7 +273,19 @@ const sources = {
       // feet, the canvas does not.
       robot.style.opacity = p === 1 ? '1' : '0';
       canvas.style.visibility = p === 1 ? 'hidden' : 'visible';
-      if (p === 1) return;
+      headCanvas.style.visibility = p === 1 && watching ? 'visible' : 'hidden';
+      if (p === 1) {
+        if (watching) {
+          // The robot's own head is in the picture under this canvas, so the
+          // page's colour hides it.
+          const { x, y, w, h } = lookField;
+          headContext.setTransform(headCanvas.width / w, 0, 0, headCanvas.height / h, 0, 0);
+          headContext.imageSmoothingQuality = 'high';
+          headContext.clearRect(0, 0, w, h);
+          replace(headContext, look(gaze.pan, gaze.up), lookField, -x, -y, 1, page);
+        }
+        return;
+      }
 
       const scale = start ** (1 - ease(p));
       // The mark moves to its resting place in step with the scale: one zoom
@@ -232,43 +334,80 @@ const sources = {
       const close = !lift && px * ratio > 1.2 * (heads[0].naturalWidth / headField.w);
       const head = close && sharp.naturalWidth ? sharp : heads[lift];
       if (lift < heads.length - 1 && head.naturalWidth) {
-        const { x, y, w, h } = headField;
-        // The pictures' own head goes first, from inside the faded edge of
-        // the head's picture: 6% of its longer side, and 8% is left.
-        const edge = 0.08 * Math.max(w, h);
-        context.clearRect(
-          left + (x + edge) * px,
-          top + (y + edge) * px,
-          (w - 2 * edge) * px,
-          (h - 2 * edge) * px
-        );
-        context.globalAlpha = 1;
-        context.drawImage(head, left + x * px, top + y * px, w * px, h * px);
+        replace(context, head, headField, left, top, px);
+      }
+      if (watching && turned(p)) {
+        const picture = look(gaze.pan * turned(p), gaze.up * turned(p));
+        replace(context, picture, lookField, left, top, px);
       }
     };
 
     const scrolled = () =>
       clamp(-hero.getBoundingClientRect().top / (travel.offsetHeight || 1));
 
+    // The look that points the head at the pointer, as if the pointer hung
+    // `reach` mm in front of the robot: straight ahead until the looks are in,
+    // and when the pointer has left the page.
+    const reach = 700;
+    let watching = false;
+    let pointer: { x: number; y: number } | undefined;
+    const aim = () => {
+      if (!watching || !pointer) return { pan: 0, up: 0 };
+      const s = stage.getBoundingClientRect();
+      const [eyesX, eyesY] = lookField.eyes;
+      const angle = (px: number) => (Math.atan(px / rest / reach) * 180) / Math.PI;
+      const nearest = (list: number[], to: number) =>
+        list.reduce((a, b) => (Math.abs(b - to) < Math.abs(a - to) ? b : a));
+      return {
+        pan: nearest(lookField.pans, angle(pointer.x - s.left - x - eyesX * rest)),
+        up: nearest(lookField.ups, angle(s.top + y + eyesY * rest - pointer.y)),
+      };
+    };
+
     // The zoom follows the scroll a few frames behind, so a mouse wheel's steps
     // come out as one movement. It closes in faster past the end of the travel:
     // the stage then scrolls on, and the canvas stops half a screen further down.
+    // The head follows its aim the same way, most of the turn in a fifth of a
+    // second.
     let p = 0;
     let frameId = 0;
-    const follow = () => {
+    let before = 0; // when the last frame was, while frames follow each other
+    const follow = (now: number) => {
       const to = scrolled();
       p += (to - p) * (to === 1 ? 0.5 : 0.25);
       if (Math.abs(to - p) < 0.0005) p = to;
+      const at = aim();
+      const closer = 1 - Math.exp(-Math.min(now - (before || now - 16), 50) / 80);
+      gaze.pan += (at.pan - gaze.pan) * closer;
+      gaze.up += (at.up - gaze.up) * closer;
+      if (Math.hypot(at.pan - gaze.pan, at.up - gaze.up) < 0.1) Object.assign(gaze, at);
       draw(p);
-      frameId = p === to ? 0 : requestAnimationFrame(follow);
+      const there = p === to && gaze.pan === at.pan && gaze.up === at.up;
+      frameId = there ? 0 : requestAnimationFrame(follow);
+      before = there ? 0 : now;
     };
-    addEventListener(
-      'scroll',
-      () => {
-        frameId ||= requestAnimationFrame(follow);
-      },
-      { passive: true }
-    );
+    const wake = () => {
+      frameId ||= requestAnimationFrame(follow);
+    };
+    addEventListener('scroll', wake, { passive: true });
+
+    // A mouse wheel says where the pointer is too, before it has moved. A
+    // finger is no pointer: it is on the screen only while it scrolls.
+    let pointed = () => {};
+    const hasPointer = new Promise<void>((resolve) => (pointed = resolve));
+    const see = (event: PointerEvent | WheelEvent) => {
+      if ('pointerType' in event && event.pointerType === 'touch') return;
+      pointer = { x: event.clientX, y: event.clientY };
+      pointed();
+      // only where the head turns, and not once it has scrolled off the screen
+      if (watching && turned(p) && stage.getBoundingClientRect().bottom > 0) wake();
+    };
+    addEventListener('pointermove', see, { passive: true });
+    addEventListener('wheel', see, { passive: true });
+    document.documentElement.addEventListener('pointerleave', () => {
+      pointer = undefined;
+      wake();
+    });
 
     // The resting state moves when the screen is resized, when the stylesheet
     // comes in and when the headline's font does. The observer also runs once
@@ -282,10 +421,10 @@ const sources = {
     resting.observe(view);
 
     // The pictures, each drawn as soon as it is in. The cover goes once the
-    // closer ones are: the first screen is theirs. The head's frames come last.
-    const sources: { levels: string[]; head: string; frames: string[] } = JSON.parse(
-      canvas.dataset.pictures!
-    );
+    // closer ones are: the first screen is theirs. The head's frames come
+    // after, and its looks last, once there is a pointer to look at.
+    const sources: { levels: string[]; head: string; frames: string[]; looks: string[] } =
+      JSON.parse(canvas.dataset.pictures!);
     const load = (src: string) => {
       const picture = Object.assign(new Image(), { src });
       const loaded = picture.decode().then(
@@ -298,15 +437,33 @@ const sources = {
     const pictures = levels.map(({ picture }) => picture);
     const { picture: sharp, loaded: sharpLoaded } = load(sources.head);
     const heads = sources.frames.map(() => new Image());
-    Promise.all([...levels.slice(1).map(({ loaded }) => loaded), sharpLoaded]).then(() => {
+    const looks = sources.looks.map(() => new Image());
+    const lift = Promise.all([
+      ...levels.slice(1).map(({ loaded }) => loaded),
+      sharpLoaded,
+    ]).then(() => {
       cover.style.opacity = '0';
-      sources.frames.forEach((src, i) => {
-        heads[i].src = src;
-        heads[i].decode().then(
-          () => draw(p),
-          () => {}
-        );
-      });
+      return Promise.all(
+        sources.frames.map((src, i) =>
+          Object.assign(heads[i], { src })
+            .decode()
+            .then(
+              () => draw(p),
+              () => {}
+            )
+        )
+      );
     });
+    Promise.all([lift, hasPointer])
+      .then(() =>
+        Promise.all(sources.looks.map((src, i) => Object.assign(looks[i], { src }).decode()))
+      )
+      .then(
+        () => {
+          watching = true;
+          wake();
+        },
+        () => {}
+      );
   }
 </script>
