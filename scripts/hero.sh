@@ -5,7 +5,8 @@
 # widest into the page, where its floor shadow would otherwise end on a line, the head's into the robot.
 # The mark's tile takes the page's accent. The render cannot give that blue (its tone curve pales it), so
 # the tile comes in the nearest blue the render has, and is moved the rest of the way here.
-# The head's looks (look_<row>_<col>) become one picture a row.
+# The head's looks (look_<row>_<col>) become one picture a row. The whole robot and the looks come twice,
+# the second time twice as sharp (robot_2x, look_2x_<row>_<col>), for a screen that needs them.
 set -e
 zmodload zsh/mathfunc
 prefix=$1
@@ -13,8 +14,8 @@ site=${0:A:h:h}
 out=$site/src/assets/hero
 tmp=$(mktemp -d)
 trap "rm -rf $tmp" EXIT
-rm -rf $out/*.webp $out/head $out/look
-mkdir -p $out/head $out/look
+rm -rf $out/*.webp $out/head $out/look $out/look_2x
+mkdir -p $out/head $out/look $out/look_2x
 cp ${prefix}_zoom.json $out/zoom.json
 mark=$(jq .mark $out/zoom.json)
 accent=$(sed -n 's/.*--color-accent: *#\([0-9a-f]*\);.*/\1/p' $site/src/styles/global.css)
@@ -27,7 +28,7 @@ for in in ${prefix}_zoom_*.png; do
     to=$tmp/$name.png
   elif [[ $name != head* ]]; then
     # the tile's box in this picture, 2 px out for its soft edge
-    field=($(jq -r --arg name $name '.levels[] | select(.name == $name) | "\(.x) \(.y) \(.w) \(.h)"' $out/zoom.json))
+    field=($(jq -r --arg name ${name%_2x} '.levels[] | select(.name == $name) | "\(.x) \(.y) \(.w) \(.h)"' $out/zoom.json))
     px=$(( size[1] / field[3] ))   # per mm
     side=$(( int(mark * px) + 4 ))
     at=+$(( int((-mark / 2 - field[1]) * px) - 2 ))+$(( int((-mark / 2 - field[2]) * px) - 2 ))
@@ -55,8 +56,9 @@ for in in ${prefix}_zoom_*.png; do
 done
 # A row's looks side by side. There are many, each small on the screen and passing by, so they are packed
 # harder: at quality 82 with 14 levels of transparency a look shows no difference at four times its size.
-for first in $tmp/look_*_00.png(N); do
-  row=${${first:t}[6,7]}
-  magick $tmp/look_${row}_*.png +append -quality 82 -define webp:method=6 -define webp:alpha-quality=60 $out/look/$row.webp
+for first in $tmp/look_[0-9][0-9]_00.png(N) $tmp/look_2x_[0-9][0-9]_00.png(N); do
+  kind=${${first:t}%_??_00.png}   # look or look_2x
+  row=${${${first:t}%_00.png}##*_}
+  magick $tmp/${kind}_${row}_*.png +append -quality 82 -define webp:method=6 -define webp:alpha-quality=60 $out/$kind/$row.webp
 done
-du -ch $out/*.webp $out/head $out/look | tail -4
+du -ch $out/*.webp $out/head $out/look $out/look_2x | tail -5
