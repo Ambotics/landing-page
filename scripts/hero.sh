@@ -7,6 +7,7 @@
 # the tile comes in the nearest blue the render has, and is moved the rest of the way here.
 # The head's looks (look_<row>_<col>) become one picture a row. The whole robot and the looks come twice,
 # the second time twice as sharp (robot_2x, look_2x_<row>_<col>), for a screen that needs them.
+# The looks' reliefs (<prefix>_zoom_relief_<row>_<col>.ppm) become one picture, laid out as the looks are.
 set -e
 zmodload zsh/mathfunc
 prefix=$1
@@ -61,4 +62,9 @@ for first in $tmp/look_[0-9][0-9]_00.png(N) $tmp/look_2x_[0-9][0-9]_00.png(N); d
   row=${${${first:t}%_00.png}##*_}
   magick $tmp/${kind}_${row}_*.png +append -quality 82 -define webp:method=6 -define webp:alpha-quality=60 $out/$kind/$row.webp
 done
+# The reliefs are numbers, not a picture: kept to the bit.
+for first in ${prefix}_zoom_relief_[0-9][0-9]_00.ppm; do
+  magick ${first%_00.ppm}_*.ppm +append $tmp/relief_${${first%_00.ppm}##*_}.png
+done
+magick $tmp/relief_*.png -append -define webp:lossless=true -define webp:method=6 -quality 100 $out/relief.webp
 du -ch $out/*.webp $out/head $out/look $out/look_2x | tail -5
