@@ -10,10 +10,12 @@
 // are one picture that stays sharp from the tile out to the robot. The head is
 // pictures of its own through the same camera: looking down, then lifting to
 // where the five have it, level, and from there looking around, for the head
-// to turn after the visitor's pointer once the robot is at rest. All come from
-// the robot's own render script (see "The hero" in README.md). The whole robot
-// and the head's looks come twice, the second time twice as sharp: a large
-// screen shows the robot at rest larger than its first picture.
+// to turn after the visitor's pointer once the robot is at rest. `relief.webp`
+// says how far off each px of those looks is, for the head on its way from one
+// to the next. All come from the robot's own render script (see "The hero" in
+// README.md). The whole robot and the head's looks come twice, the second time
+// twice as sharp: a large screen shows the robot at rest larger than its first
+// picture.
 //
 // CSS lays out the resting state: headline, then the whole robot. The script
 // only draws the zoom while the visitor scrolls through [data-travel], so
@@ -45,6 +47,8 @@ const sources = {
     robot: picture('robot_2x').src,
     looks: zoom.look.ups.map((_, i) => picture(`look_2x/${String(i).padStart(2, '0')}`).src),
   },
+  // every look's relief, a look beside the next as in the rows above
+  relief: picture('relief').src,
 };
 ---
 
@@ -210,62 +214,315 @@ const sources = {
 
     // Where the head looks, in degrees to the right and up from straight ahead.
     const gaze = { pan: 0, up: 0 };
-    // The head as it looks that way. There is a look every few degrees. On the
-    // way from one to the next the head is the nearer of them, moved to where
-    // the head is by then, so it stays sharp and moves evenly: a blend of two
-    // looks is two heads. What stands still under the neck stays where it is,
-    // and the neck between is stretched.
-    const posed = document.createElement('canvas');
-    const pose = posed.getContext('2d')!;
-    const look = (pan: number, up: number) => {
-      const { y: top, w, pans, ups, eyes, chins, neck } = lookField;
-      const column = (pan - pans[0]) / (pans[1] - pans[0]);
-      const row = (ups[0] - up) / (ups[0] - ups[1]);
-      const c = Math.round(column);
-      const r = Math.round(row);
-      const side = looks[0].naturalWidth / pans.length;
-      const height = looks[0].naturalHeight;
-      const px = side / w; // the look's own, per mm
-
-      // How far the eyes are from where this look has them: between four
-      // looks they are between those looks' eyes.
-      const c0 = Math.min(Math.floor(column), pans.length - 2);
-      const r0 = Math.min(Math.floor(row), ups.length - 2);
-      const between = (i: number) => {
-        const along = (r: number) =>
-          eyes[r][c0][i] + (eyes[r][c0 + 1][i] - eyes[r][c0][i]) * (column - c0);
-        return along(r0) + (along(r0 + 1) - along(r0)) * (row - r0);
-      };
-      const dx = (between(0) - eyes[r][c][0]) * px;
-      const dy = (between(1) - eyes[r][c][1]) * px;
-
-      // In strips from the top. The head down to its chin moves whole, the neck
-      // under it less the lower, a row of px at a time, and from where the neck
-      // stands still nothing moves. Each strip runs a px into the next, so none
-      // shows a seam.
-      const chin = Math.round((chins[r][c] - top) * px);
-      const still = Math.round((neck - top) * px);
-      const moved = (y: number) => clamp((still - y) / (still - chin));
-      const edges = [0, ...Array.from({ length: still - chin + 1 }, (_, i) => chin + i), height];
-      posed.width = side; // which clears it too
-      posed.height = height;
-      edges.slice(1).forEach((end, i) => {
-        const from = edges[i];
-        const to = Math.min(end + 1, height);
-        const at = from + dy * moved(from);
-        pose.drawImage(
-          looks[r],
-          c * side,
-          from,
-          side,
-          to - from,
-          dx * moved((from + end) / 2),
-          at,
-          side,
-          to + dy * moved(to) - at
-        );
+    // The head as it looks that way. There is a look every few degrees, and a
+    // blend of two is two heads: they have the head in two places. So the looks
+    // about the pose wanted are first turned to it, every px of each moved to
+    // where it is by then, and only then blended, each the more the nearer it
+    // is. `relief.webp` has each look's relief for that: for every px the
+    // neck's parts can get to, how far off the robot is there, and whether it
+    // is the head, the pan stage under it, or something that stands still. Each
+    // part turns about its own axis. Moved whole, the head's way, a look had
+    // the neck's parts sliding along and jumping back at each change of look.
+    const { pans, ups } = lookField;
+    const posed = document.createElement('canvas'); // the looks, turned
+    const plain = document.createElement('canvas'); // a look as it is
+    const cell = plain.getContext('2d')!;
+    // Getting ready to turn them takes a quarter of a second, so it is done
+    // in parts, each when the page has nothing else to do.
+    const pause = () =>
+      new Promise<void>((done) => {
+        if ('requestIdleCallback' in window) requestIdleCallback(() => done(), { timeout: 300 });
+        else setTimeout(done, 30);
       });
-      return posed;
+    const turning = async (reliefs: ImageBitmap) => {
+      const { width: side, height } = plain;
+      Object.assign(posed, { width: side, height });
+      await pause();
+      // Not where the browser would draw it without a graphics card: a frame
+      // then takes a second.
+      const gl = posed.getContext('webgl2', {
+        depth: false,
+        antialias: false,
+        preserveDrawingBuffer: true,
+        failIfMajorPerformanceCaveat: true,
+      });
+      if (!gl || gl.getParameter(gl.MAX_TEXTURE_SIZE) < Math.max(reliefs.width, reliefs.height)) return null;
+      const program = (vertex: string, fragment: string) => {
+        const made = gl.createProgram()!;
+        [vertex, fragment].forEach((source, i) => {
+          const shader = gl.createShader(i ? gl.FRAGMENT_SHADER : gl.VERTEX_SHADER)!;
+          gl.shaderSource(shader, `#version 300 es\nprecision highp float;\n${source}`);
+          gl.compileShader(shader);
+          gl.attachShader(made, shader);
+        });
+        gl.linkProgram(made);
+        return made;
+      };
+
+      // A look, turned: a square for each px of its relief, as far off as the
+      // relief says, on its part's way to the pose. A quarter px wider all
+      // round, so no gap opens between two that part a little. Or, with `rest`,
+      // a field of the look outside its relief, where nothing turns.
+      const turn = program(
+        `uniform highp sampler2D relief;
+        uniform ivec2 sheet; // where this look's relief starts among them all
+        uniform ivec2 cells; // a relief's px
+        uniform vec4 box; // a relief on the mark's plane, mm
+        uniform vec4 field; // a look on the mark's plane, mm
+        uniform float camera; // mm in front of the mark
+        uniform vec2 depth; // mm behind the mark's plane at red 0, and what red 1 adds
+        uniform mat4 turn[3]; // each part's way from this look to the pose
+        uniform vec4 rest; // left, top, right and bottom of a field that stands still, mm
+        layout(location = 0) in vec2 corner;
+        out vec2 at;
+        void main() {
+          vec2 on = mix(rest.xy, rest.zw, corner);
+          vec2 point = vec2(1, 0); // how far off, and which part
+          if (rest.xy == rest.zw) {
+            ivec2 cell = ivec2(gl_InstanceID % cells.x, gl_InstanceID / cells.x);
+            vec4 read = texelFetch(relief, sheet + cell, 0);
+            point = vec2(read.r, floor(read.g * 2.55 + 0.5));
+            on = box.xy + box.zw * (vec2(cell) + corner * 1.5 - 0.25) / vec2(cells);
+          }
+          float off = depth.x + depth.y * point.x;
+          vec4 there = turn[int(point.y)] * vec4(on * (off + camera) / camera, off, 1);
+          float w = (there.z + camera) / camera;
+          vec2 seen = (there.xy / w - field.xy) / field.zw * 2.0 - 1.0;
+          gl_Position = vec4(seen.x, -seen.y, (there.z - depth.x) / depth.y * 1.6 - 0.8, 1) * w;
+          at = (on - field.xy) / field.zw;
+        }`,
+        `uniform sampler2D look;
+        in vec2 at;
+        out vec4 colour;
+        void main() {
+          colour = texture(look, at);
+          if (colour.a < 0.004) discard;
+        }`
+      );
+      // The turned looks, blended. Where one look shows something nearer than
+      // another does, the other cannot see that part from where it looks, and
+      // is left out. That as far as the nearer look has weight: one far from
+      // the pose is turned far, and its edges are a little off. For the same
+      // reason, what looks of less than half the weight show alone is as faint
+      // as they are far.
+      const blend = program(
+        `layout(location = 0) in vec2 corner;
+        void main() {
+          gl_Position = vec4(corner * 4.0 - 1.0, 0, 1);
+        }`,
+        `uniform sampler2D colours[4];
+        uniform highp sampler2D depths[4];
+        uniform float weights[4]; // 0 for one not drawn
+        uniform float within; // as far behind the nearest as still counts as the same
+        out vec4 colour;
+        void main() {
+          ivec2 here = ivec2(gl_FragCoord.xy);
+          vec4 shown[4];
+          float off[4];
+          #define READ(i) shown[i] = texelFetch(colours[i], here, 0); off[i] = texelFetch(depths[i], here, 0).r;
+          READ(0) READ(1) READ(2) READ(3)
+          vec4 sum = vec4(0);
+          float weight = 0.0, all = 0.0;
+          for (int i = 0; i < 4; i++) {
+            if (weights[i] <= 0.0 || shown[i].a <= 0.0) continue;
+            float share = weights[i];
+            for (int j = 0; j < 4; j++) {
+              if (shown[j].a >= 0.5 && off[j] < off[i] - within) share *= 1.0 - clamp(weights[j] * 5.0 - 0.25, 0.0, 1.0);
+            }
+            sum += shown[i] * share;
+            weight += share;
+            all += weights[i];
+          }
+          colour = sum / max(weight, 0.0001) * min(all * 2.0, 1.0);
+        }`
+      );
+      await pause();
+      if (![turn, blend].every((made) => gl.getProgramParameter(made, gl.LINK_STATUS))) return null;
+      const places = new Map<string, WebGLUniformLocation | null>();
+      const uniform = (name: string) => {
+        if (!places.has(name)) places.set(name, gl.getUniformLocation(turn, name));
+        return places.get(name)!;
+      };
+
+      // Each of the four looks is turned into a picture of its own, with a
+      // picture of how far off it is.
+      const frames = [0, 1, 2, 3].map((i) => {
+        const frame = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, frame);
+        [gl.RGBA8, gl.DEPTH_COMPONENT24].forEach((kind, depth) => {
+          const picture = gl.createTexture();
+          gl.activeTexture(gl.TEXTURE2 + i + 4 * depth);
+          gl.bindTexture(gl.TEXTURE_2D, picture);
+          gl.texStorage2D(gl.TEXTURE_2D, 1, kind, side, height);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+          gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            depth ? gl.DEPTH_ATTACHMENT : gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
+            picture,
+            0
+          );
+        });
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        return frame;
+      });
+      if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) return null;
+
+      await pause();
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+      gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG8, gl.RG, gl.UNSIGNED_BYTE, reliefs);
+      reliefs.close();
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+      const { camera, relief } = lookField;
+      const [across, down] = relief.cells;
+      const deep = relief.far - relief.near;
+      const field = [lookField.x, lookField.y, lookField.w, lookField.h];
+      const [left, top, right, bottom] = [field[0], field[1], field[0] + field[2], field[1] + field[3]];
+      // The look around its relief: above, below, left and right of it.
+      const around = [
+        [left, top, right, relief.y],
+        [left, relief.y + relief.h, right, bottom],
+        [left, relief.y, relief.x, relief.y + relief.h],
+        [relief.x + relief.w, relief.y, right, relief.y + relief.h],
+      ];
+      gl.useProgram(turn);
+      gl.uniform2i(uniform('cells'), across, down);
+      gl.uniform4f(uniform('box'), relief.x, relief.y, relief.w, relief.h);
+      gl.uniform4fv(uniform('field'), field);
+      gl.uniform1f(uniform('camera'), camera);
+      gl.uniform2f(uniform('depth'), relief.near, deep);
+      gl.uniform1i(uniform('relief'), 1);
+      // Two looks agree on what is nearest to within 6 mm.
+      gl.useProgram(blend);
+      gl.uniform1iv(gl.getUniformLocation(blend, 'colours'), [2, 3, 4, 5]);
+      gl.uniform1iv(gl.getUniformLocation(blend, 'depths'), [6, 7, 8, 9]);
+      gl.uniform1f(gl.getUniformLocation(blend, 'within'), (6 / deep) * 0.8);
+      const weights = gl.getUniformLocation(blend, 'weights');
+      // The four corners of a square. The blend draws the first three, far
+      // enough apart to cover the picture. They could be counted off in the
+      // shaders, but Firefox on a Mac draws slowly with nothing handed in.
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.depthFunc(gl.LEQUAL);
+
+      // A look's own picture, cut out of its row. The last few stay.
+      const kept = new Map<number, WebGLTexture>();
+      const picture = (r: number, c: number) => {
+        const key = r * pans.length + c;
+        let made = kept.get(key);
+        kept.delete(key);
+        if (!made) {
+          cell.clearRect(0, 0, side, height);
+          cell.drawImage(looks[r], c * side, 0, side, height, 0, 0, side, height);
+          made = gl.createTexture()!;
+          gl.bindTexture(gl.TEXTURE_2D, made);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, plain);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        }
+        kept.set(key, made);
+        if (kept.size > 24) {
+          const [oldest, gone] = kept.entries().next().value!;
+          gl.deleteTexture(gone);
+          kept.delete(oldest);
+        }
+        return made;
+      };
+
+      // A turn about the pan axis, which stands upright, or about the tilt
+      // axis, which lies across with the head straight ahead. On the mark's
+      // plane x is to the right, y down and z away from the camera.
+      const about = (degrees: number, [a, b]: number[], upright: boolean) => {
+        const cos = Math.cos((degrees * Math.PI) / 180);
+        const sin = Math.sin((degrees * Math.PI) / 180);
+        return upright
+          ? [cos, 0, -sin, a - a * cos + b * sin, 0, 1, 0, 0, sin, 0, cos, b - a * sin - b * cos, 0, 0, 0, 1]
+          : [1, 0, 0, 0, 0, cos, sin, a - a * cos - b * sin, 0, -sin, cos, b + a * sin - b * cos, 0, 0, 0, 1];
+      };
+      const times = (a: number[], b: number[]) =>
+        a.map((_, i) => [0, 1, 2, 3].reduce((sum, k) => sum + a[(i & 12) + k] * b[4 * k + (i & 3)], 0));
+
+      const turnTo = (pan: number, up: number) => {
+        const column = (pan - pans[0]) / (pans[1] - pans[0]);
+        const row = (ups[0] - up) / (ups[0] - ups[1]);
+        const c0 = Math.min(Math.floor(column), pans.length - 2);
+        const r0 = Math.min(Math.floor(row), ups.length - 2);
+        // The four looks about the pose, the nearest first, each with its
+        // weight and each part's way from it to the pose: what stands still,
+        // the pan stage, the head. On a look, that look alone.
+        const near = [
+          [r0, c0],
+          [r0, c0 + 1],
+          [r0 + 1, c0],
+          [r0 + 1, c0 + 1],
+        ]
+          .map(([r, c]) => ({
+            r,
+            c,
+            weight: Math.max(1 - Math.abs(row - r), 0) * Math.max(1 - Math.abs(column - c), 0),
+            turns: [
+              ...about(0, [0, 0], true),
+              ...about(pan - pans[c], lookField.pan, true),
+              ...times(
+                about(pan, lookField.pan, true),
+                times(about(up - ups[r], lookField.tilt, false), about(-pans[c], lookField.pan, true))
+              ),
+            ],
+          }))
+          .filter(({ weight }) => weight > 0)
+          .sort((a, b) => b.weight - a.weight);
+        gl.useProgram(turn);
+        gl.enable(gl.DEPTH_TEST);
+        near.forEach(({ r, c, turns }, i) => {
+          gl.bindFramebuffer(gl.FRAMEBUFFER, frames[i]);
+          gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+          gl.bindTexture(gl.TEXTURE_2D, picture(r, c));
+          gl.uniform2i(uniform('sheet'), c * across, r * down);
+          gl.uniformMatrix4fv(uniform('turn'), true, turns);
+          gl.uniform4f(uniform('rest'), 0, 0, 0, 0);
+          gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, across * down);
+          around.forEach((rest) => {
+            gl.uniform4fv(uniform('rest'), rest);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          });
+        });
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.disable(gl.DEPTH_TEST);
+        gl.useProgram(blend);
+        gl.uniform1fv(weights, [0, 1, 2, 3].map((i) => near[i]?.weight ?? 0));
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      };
+      // Once now: the first time is the slowest. And not at all if the
+      // browser took anything amiss: the looks would be blended unturned.
+      await pause();
+      turnTo(0, 0);
+      return gl.getError() === gl.NO_ERROR ? turnTo : null;
+    };
+    // Where that cannot be drawn, the head is the nearest look as it is, and
+    // steps from look to look.
+    let turner: Awaited<ReturnType<typeof turning>> = null;
+    posed.addEventListener('webglcontextlost', () => (turner = null));
+    const look = (pan: number, up: number) => {
+      if (turner) {
+        turner(pan, up);
+        return posed;
+      }
+      const c = Math.round((pan - pans[0]) / (pans[1] - pans[0]));
+      const r = Math.round((ups[0] - up) / (ups[0] - ups[1]));
+      const { width, height } = plain;
+      cell.clearRect(0, 0, width, height);
+      cell.drawImage(looks[r], c * width, 0, width, height, 0, 0, width, height);
+      return plain;
     };
 
     // A picture of the head goes over the robot's own head, with the mark's
@@ -420,7 +677,7 @@ const sources = {
       const closer = 1 - Math.exp(-Math.min(now - (before || now - 16), 50) / 80);
       gaze.pan += (at.pan - gaze.pan) * closer;
       gaze.up += (at.up - gaze.up) * closer;
-      if (Math.hypot(at.pan - gaze.pan, at.up - gaze.up) < 0.1) Object.assign(gaze, at);
+      if (Math.hypot(at.pan - gaze.pan, at.up - gaze.up) < 0.02) Object.assign(gaze, at);
       draw(p);
       const there = p === to && gaze.pan === at.pan && gaze.up === at.up;
       frameId = there ? 0 : requestAnimationFrame(follow);
@@ -470,6 +727,7 @@ const sources = {
       frames: string[];
       looks: string[];
       sharper: { robot: string; looks: string[] };
+      relief: string;
     } = JSON.parse(canvas.dataset.pictures!);
     const load = (src: string) => {
       const picture = Object.assign(new Image(), { src });
@@ -536,20 +794,26 @@ const sources = {
         picture.onerror = reject;
         picture.src = src;
       });
-    Promise.all([lift, hasPointer])
-      .then(() =>
-        Promise.all(
-          large()
-            ? sources.sharper.looks.map((src, i) => fetched(looks[i], src))
-            : sources.looks.map((src, i) => Object.assign(looks[i], { src }).decode())
-        )
-      )
-      .then(
-        () => {
-          watching = true;
-          wake();
-        },
-        () => {}
+    // The looks come in once there is a pointer to look at, and their reliefs
+    // beside them. Without the reliefs the head steps from look to look.
+    const watch = async () => {
+      await Promise.all([lift, hasPointer]);
+      const reliefs = fetch(sources.relief)
+        .then((got) => got.blob())
+        .then((blob) => createImageBitmap(blob))
+        .catch(() => null);
+      await Promise.all(
+        large()
+          ? sources.sharper.looks.map((src, i) => fetched(looks[i], src))
+          : sources.looks.map((src, i) => Object.assign(looks[i], { src }).decode())
       );
+      plain.width = looks[0].naturalWidth / pans.length;
+      plain.height = looks[0].naturalHeight;
+      const relief = await reliefs;
+      turner = relief && (await turning(relief).catch(() => null));
+      watching = true;
+      wake();
+    };
+    watch().catch(() => {});
   }
 </script>

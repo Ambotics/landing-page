@@ -29,7 +29,7 @@ public/
 scripts/hero.sh           # encodes the hero's pictures from the robot's renders
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
-    hero/                 # the hero's pictures of the robot, and where each lies (zoom.json)
+    hero/                 # the hero's pictures of the robot, where each lies (zoom.json), the looks' reliefs
     mark.svg              # the mark's drawing — read by Mark.astro and by the robot's render
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
@@ -188,15 +188,22 @@ on down the robot to its base. At rest the head turns after the visitor's pointe
   `look/09.webp` have it looking around from level: a look every 5 degrees, 40 to either
   side, 20 up and 25 down, 17 side by side in a picture for each height. The page takes the
   pointer to hang 700mm in front of the robot and turns the head to the nearest look, most
-  of the way in a fifth of a second. On the way it is the nearer look with the head moved
-  to where it is by then, so it stays sharp: `zoom.json` has every look's eyes and chin.
-  It stops on a look. Over the last 5% of the zoom it turns part of the way, to the look
-  nearest that. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
-  robot can take.
-- **905 kB for every visitor, 538 kB more for one with a mouse.** A large screen takes
-  325 kB for the sharper robot, and with a mouse 1.19 MB of sharper looks in place of the
-  538 kB. The five pictures are 425 kB and the head's lift is 481 kB. The lift's 32 are fetched once the first screen is
-  up. The looks come after them, and only once a mouse moves or a wheel turns: a phone
+  of the way in a fifth of a second. It stops on a look. Over the last 5% of the zoom it
+  turns part of the way, to the look nearest that. The neck's own limits are wider (pan 90,
+  30 up, 74 down), so every look is one the robot can take.
+- **Between looks the head is drawn from the four looks about it**, each turned to where
+  the head is by then, and only then blended, the nearer the look the more of it. The
+  neck's parts turn about two axes, so each px of a look has to move its own way.
+  `relief.webp` has, for every px of every look that those parts get to, how far off the
+  robot is there and whether it is the head, the pan stage under it or something that
+  stands still; `zoom.json` has where the two axes are. The browser's graphics card does
+  the turning (WebGL 2). A browser without it shows the nearest look as it is, and the head
+  steps from look to look.
+- **905 kB for every visitor, 737 kB more for one with a mouse**: the looks 538 kB and
+  their reliefs 199 kB. A large screen takes 325 kB for the sharper robot, and with a mouse
+  1.19 MB of sharper looks in place of the 538 kB. The five pictures are 425 kB and the
+  head's lift is 481 kB. The lift's 32 are fetched once the first screen is up. The looks
+  and the reliefs come after them, and only once a mouse moves or a wheel turns: a phone
   never fetches them.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
   no script. The script draws the zoom on a canvas while the visitor scrolls through the
@@ -233,10 +240,13 @@ name matches, here row 03 of the looks, so the work can go to several Blenders a
 Fifteen side by side took 21 min with the machine's load average near 25: one for the five
 pictures and the sharper robot on six threads (`-t 6`), four for the lift on four each, ten
 for the looks on two each. Ten more for the sharper looks, on three threads each, took
-17 min. With every Blender on all cores the load average went past 100. Then here,
-`scripts/hero.sh <out>/hero` moves the tile to the accent, fades each picture's edges,
-encodes it into `src/assets/hero/` and copies `zoom.json`: 6 min when it runs outside the agent's
-background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
+17 min. With every Blender on all cores the load average went past 100. The looks'
+reliefs come from rays, not from renders: `--zoom-only '^relief_'` writes them alone, 3 min
+with five Blenders side by side. Then here, `scripts/hero.sh <out>/hero` moves the tile to
+the accent, fades each picture's edges, encodes it into `src/assets/hero/`, packs the
+reliefs into `relief.webp` to the bit and copies `zoom.json`: 6 min when it runs outside
+the agent's background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its
+`PATH`).
 
 ## How it's built
 

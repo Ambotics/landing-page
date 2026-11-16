@@ -163,12 +163,40 @@ pointer, his pick from a list of ideas after moving.parts. How it works is in RE
   own head is in that picture, so the canvas paints the page's colour, read off `body`,
   inside the look's faded edge, then draws the look. In the zoom's canvas the same box is
   cleared instead.
-- **Two looks are never blended.** A blend is two heads: a look 5 degrees on has the head
-  5 to 7mm further along. Daniel saw it at rest, then as a blur while the head turned
-  (2026-11-15). Between looks the script draws the nearer one in strips: the head down to
-  its chin moved by the way its eyes have gone, the neck under it sheared a row of px at a
-  time, the still part as it is. `zoom.json` has every look's eyes and chin and the neck's
-  still top.
+- **Two looks are blended only once both are turned to the pose.** As they are, a blend is
+  two heads: a look 5 degrees on has the head 5 to 7mm further along. Daniel saw that at
+  rest, then as a blur while the head turned (2026-11-15). The nearer look alone, moved
+  whole by the way its eyes go, kept the head sharp but not the neck. Its parts turn about
+  other axes, so they slid along and jumped back at each change of look (Daniel,
+  2026-11-16: "the neck region is jittery when the head moves"). Now each px of a look
+  moves as its part does: `relief.webp` has its depth and its part, `zoom.json` the pan and
+  tilt axes, and `shade.py` checks the page's sums on a point of each part.
+- **How the looks are turned and blended.** Each of the four looks about the pose is drawn
+  into a picture of its own: a square for each px of its relief, a quarter px wider all
+  round, the nearer square on top. One pass then blends the four by weight. A look is left
+  out of a px where another look shows something over 6mm nearer, as far as that other
+  look has weight: none under 5%, all of it from 25%. What looks of under half the weight
+  show alone is as faint as their weight. What was tried first, and why it went:
+  - A net of triangles over the look. A triangle across two parts dragged a ring of the
+    part behind along with the part in front.
+  - The nearest look on top and the others only in its gaps. The neck still jumped at a
+    change of look: by its shading, and by the faces that only the next look has.
+  - All four looks' squares summed into one picture. The squares overlap, so a px got one
+    or two of a look, and the looks' shares changed from px to px: a checker in the lenses.
+  - Every look with a full say in what is nearest. A look far from the pose is turned far
+    and its edges are a little off: it hid the near look along edges, just before the head
+    came to rest. A full say from 15% weight on made a small jump where a look crossed that.
+- **The relief is not quite what the camera sees.** A lens is as far off as its middle, a
+  gap a px or two wide is closed, and a px on the robot's edge against nothing is as far
+  off as the furthest of the robot in it. Each answers an artefact: `full_robot/README.md`
+  in `open_arm-mods` has them.
+- **At rest the turned look is the look, px for px**: one look, turned by nothing. Check
+  that after any change to the drawing (see "Verifying visual changes").
+- **Getting WebGL ready takes a quarter of a second** on this machine: the context 25 to
+  55ms, the reliefs 110ms if they come as an `Image` (so they come as an `ImageBitmap`,
+  decoded off the page's thread), the first draw 60ms. It is done in parts, each in idle
+  time, and the head starts to follow after it. `failIfMajorPerformanceCaveat` keeps it
+  off a browser that would draw it in software, where a frame takes a second.
 - **The head stops on a look.** Short of rest it does too. Over the last 5% of the travel it turns part
   of the way to the pointer, and its aim is the look nearest that. The part was once a
   factor on the look drawn, and the head sat blurred wherever the scroll stopped there
@@ -200,21 +228,31 @@ pointer, his pick from a list of ideas after moving.parts. How it works is in RE
   a nav, 14px copy in one column. That page went, with `Sidebar.astro`,
   `SectionHeading.astro` and the `muted` and `nav` tokens; `95f8578` is the last commit
   with it. `/v2-preview` redirects to `/`.
-- The render script's side is in `open_arm-mods` main (its PRs #24 and #25).
+- The render script's side is in `open_arm-mods` main (its PRs #24 and #25), but for the
+  looks' reliefs: those are on its branch `agent/super-nerd/now-318-neck`, not merged.
 - Checked in Playwright's Chromium and WebKit at 1440 × 900, 2560 × 1440 at 2x and
-  390 × 844. Not run in a real Safari, on a phone, or on a slow machine.
+  390 × 844, and the head's turn in its Firefox too. Not run in a real Safari, on a phone,
+  or on a slow machine.
 - Off the page the mark is still the footer's badge, a white tile with the A in the
   accent: favicon, apple-touch-icon, `og-image.png`. The hero's mark is the reverse, an
   accent tile. Daniel has not said whether they follow.
-- The sharper looks' first use was not timed: each is decoded when the head first needs it.
+- A row of sharper looks is decoded when the head first needs it: about 100ms in Chromium
+  here. A turn between two rows needs both.
+- The turn's drawing was not timed on a slow graphics card. A frame draws up to four looks
+  of 48 000 squares each; this machine's does it in 0.4ms.
 - Daniel watched the head follow the pointer on the live page ("Nice!"). How far it turns
   for a pointer (`reach`) and how fast (80ms in `follow`) are as first set; he has asked for
   no change.
-- The head's turn without a blend was checked frame by frame, not watched: Playwright's
-  clock held (`page.clock.install`, `pauseAt`, `runFor(16)`) and a screenshot a frame, a
-  turn sideways and one up and down in Chromium, a diagonal one in WebKit. The lenses keep
-  their size and darkness in every frame, and their way from frame to frame falls off
-  evenly. At a change of look the head's shape changes at once: a px or two at its ends.
+- The neck's jitter was measured, not watched: Playwright's clock held
+  (`page.clock.install`, `pauseAt`, `runFor(8)`), a screenshot a frame, and the mean change
+  of the neck's px from each frame to the next. In an eased turn that falls off evenly.
+  With the nearer look moved whole it jumped to 4.0 at a change of look, against 0.7 just
+  before and after. Now it stays on the curve: sideways, up and down and diagonally, in
+  Chromium and WebKit, at 1440 × 900 and at 2560 × 1440 at 2x.
+- The heads between looks were held against true renders at six poses between looks, from
+  a scratch copy of `shade.py`: within 1 level of 255 on average. They differ in the
+  lenses, whose reflections are four looks' blended and softer than the truth, and in thin
+  lines along edges.
 
 ## Gotchas
 
@@ -248,6 +286,11 @@ pointer, his pick from a list of ideas after moving.parts. How it works is in RE
 There are no tests. For anything that changes rendering, build and screenshot before
 claiming it works — `astro check` and a green build do not catch a color that didn't apply
 or a utility Tailwind never generated. Screenshot the hero in WebKit too, not
-only in Chromium: the two differ there (see "The hero"). Reading computed styles out of a real browser
+only in Chromium: the two differ there (see "The hero"). Playwright's Chromium draws WebGL
+in software unless it is launched with `--use-angle=metal --enable-gpu
+--ignore-gpu-blocklist`, and the head's turn then takes a second a frame; its WebKit uses
+the graphics card as it comes. To see the head without WebGL, give the page an init script
+that makes `HTMLCanvasElement.prototype.getContext` answer null for `webgl2`: at rest the
+two must be equal px for px. Reading computed styles out of a real browser
 (`getComputedStyle`) is the reliable check; diffing full-page screenshots against the
 previous build catches unintended layout shifts.
