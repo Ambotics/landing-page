@@ -273,9 +273,9 @@ const sources = {
         uniform vec2 depth; // mm behind the mark's plane at red 0, and what red 1 adds
         uniform mat4 turn[3]; // each part's way from this look to the pose
         uniform vec4 rest; // left, top, right and bottom of a field that stands still, mm
+        layout(location = 0) in vec2 corner;
         out vec2 at;
         void main() {
-          vec2 corner = vec2(gl_VertexID & 1, gl_VertexID >> 1);
           vec2 on = mix(rest.xy, rest.zw, corner);
           vec2 point = vec2(1, 0); // how far off, and which part
           if (rest.xy == rest.zw) {
@@ -306,8 +306,9 @@ const sources = {
       // reason, what looks of less than half the weight show alone is as faint
       // as they are far.
       const blend = program(
-        `void main() {
-          gl_Position = vec4(gl_VertexID == 1 ? 3 : -1, gl_VertexID == 2 ? 3 : -1, 0, 1);
+        `layout(location = 0) in vec2 corner;
+        void main() {
+          gl_Position = vec4(corner * 4.0 - 1.0, 0, 1);
         }`,
         `uniform sampler2D colours[4];
         uniform highp sampler2D depths[4];
@@ -363,6 +364,7 @@ const sources = {
             0
           );
         });
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         return frame;
       });
       if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) return null;
@@ -403,7 +405,13 @@ const sources = {
       gl.uniform1iv(gl.getUniformLocation(blend, 'depths'), [6, 7, 8, 9]);
       gl.uniform1f(gl.getUniformLocation(blend, 'within'), (6 / deep) * 0.8);
       const weights = gl.getUniformLocation(blend, 'weights');
-      gl.bindVertexArray(gl.createVertexArray());
+      // The four corners of a square. The blend draws the first three, far
+      // enough apart to cover the picture. They could be counted off in the
+      // shaders, but Firefox on a Mac draws slowly with nothing handed in.
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
       gl.depthFunc(gl.LEQUAL);
 
       // A look's own picture, cut out of its row. The last few stay.
@@ -494,10 +502,11 @@ const sources = {
         gl.uniform1fv(weights, [0, 1, 2, 3].map((i) => near[i]?.weight ?? 0));
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       };
-      // Once now: the first time is the slowest.
+      // Once now: the first time is the slowest. And not at all if the
+      // browser took anything amiss: the looks would be blended unturned.
       await pause();
       turnTo(0, 0);
-      return turnTo;
+      return gl.getError() === gl.NO_ERROR ? turnTo : null;
     };
     // Where that cannot be drawn, the head is the nearest look as it is, and
     // steps from look to look.

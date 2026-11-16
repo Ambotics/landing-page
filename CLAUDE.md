@@ -231,7 +231,8 @@ pointer, his pick from a list of ideas after moving.parts. How it works is in RE
 - The render script's side is in `open_arm-mods` main (its PRs #24 and #25), but for the
   looks' reliefs: those are on its branch `agent/super-nerd/now-318-neck`, not merged.
 - Checked in Playwright's Chromium and WebKit at 1440 × 900, 2560 × 1440 at 2x and
-  390 × 844. Not run in a real Safari, on a phone, or on a slow machine.
+  390 × 844, and the head's turn in its Firefox too. Not run in a real Safari, on a phone,
+  or on a slow machine.
 - Off the page the mark is still the footer's badge, a white tile with the A in the
   accent: favicon, apple-touch-icon, `og-image.png`. The hero's mark is the reverse, an
   accent tile. Daniel has not said whether they follow.
