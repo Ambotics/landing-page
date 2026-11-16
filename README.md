@@ -218,8 +218,8 @@ on down the robot to its base. At rest the head turns after the visitor's pointe
   It stops on a look. Over the last 5% of the zoom it turns part of the way, to the look
   nearest that. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
   robot can take.
-- **870 kB for every visitor, 518 kB more for one with a mouse.** The five pictures are
-  416 kB and the head's lift is 454 kB. The lift's 32 are fetched once the first screen is
+- **876 kB for every visitor, 523 kB more for one with a mouse.** The five pictures are
+  419 kB and the head's lift is 457 kB. The lift's 32 are fetched once the first screen is
   up. The looks come after them, and only once a mouse moves or a wheel turns: a phone
   never fetches them.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
@@ -253,11 +253,10 @@ tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -
 pictures have it. `--zoom-look` adds the 170 looks. One Blender would take over an hour for
 the 208 pictures: the five and the lift took 20 min, and a look is small and still takes
 20 s or more. `--zoom-only '^look_03_'` renders only the pictures whose name matches, here
-row 03 of the looks, so the work can go to several Blenders at once. Thirteen side by side
-took 24 min: one for the five pictures, two for the lift, ten for the looks. That put the
-machine's load average past 100. With each Blender held to two threads (`-t 2`) the load
-stayed near 20 and the looks took as long, but a picture of the lift took 2 min where it
-takes half a minute: give those Blenders more threads. Then here,
+row 03 of the looks, so the work can go to several Blenders at once. Fifteen side by side
+took 21 min with the machine's load average near 25: one for the five pictures on six
+threads (`-t 6`), four for the lift on four each, ten for the looks on two each. With every
+Blender on all cores the load average went past 100. Then here,
 `scripts/hero.sh <out>/hero` moves the tile to the accent, fades each picture's edges,
 encodes it into `src/assets/hero/` and copies `zoom.json`: 3 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
