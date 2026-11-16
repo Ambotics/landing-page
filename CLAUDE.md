@@ -7,11 +7,8 @@ by `.github/workflows/deploy.yml` on every push to `main`.
 npm run dev        # http://localhost:4321
 npm run build      # static build into dist/
 npx astro check    # type-check .astro/.ts
-scripts/hero.sh <prefix>   # /v2-preview's hero pictures, from the robot's renders (README, "/v2-preview")
+scripts/hero.sh <prefix>   # the hero's pictures, from the robot's renders (README, "The hero")
 ```
-
-Two pages: `/` is the live page, `/v2-preview` the next one, live for sign-off. Everything
-here is about `/` unless it says `/v2-preview`.
 
 ## Design system
 
@@ -27,10 +24,11 @@ This is the load-bearing rule when touching color:
   Things that respond to the visitor. It is never decoration. The CTA is filled with `ink`,
   not the accent: the blue owns the plane and the response states, and the control itself
   stays grayscale like everything else.
-- **Default to grayscale.** New components start in `page` / `ink` / `nav` / `muted`.
+- **Default to grayscale.** New components start in `page` / `ink` / `field`.
   Reach for `accent` only when the element genuinely does something.
 - **Don't add a second blue surface.** No blue-tinted photos, borders, dividers, or
-  section backgrounds — a second blue halves the meaning of the first.
+  section backgrounds — a second blue halves the meaning of the first. The one exception
+  is Daniel's: the mark's tile in the hero (see "The hero").
 - **Don't swap the accent for a "nicer" blue.** The specific hue is the point. If a
   request implies changing it, confirm the intent rather than assuming.
 
@@ -73,9 +71,9 @@ badge; NOW-255 had dropped it. Earlier frames put the mark on a navy square, dro
 because navy would be a second blue. The A is re-centred in the tile: the designer's frame
 sat it 17px right of centre. `src/assets/mark.svg` and `favicon.svg` carry the same
 shifted path. `Mark.astro` draws the first, and so does the robot's render, for the tile on
-the robot's chest in `/v2-preview`'s hero.
-On the page the tile follows the wordmark (muted in the sidebar, white on the footer), and
-the A shows whatever is behind it. Off the page — favicon, apple-touch-icon,
+the robot's chest in the hero.
+On the page the tile is white on the footer, beside the wordmark, and the accent in the
+hero; the A shows whatever is behind it. Off the page — favicon, apple-touch-icon,
 `og-image.png` — the badge is the footer's: a white tile with the A in `#185de4`. The
 favicon paints the A rather than cutting it, so it stays blue on any tab. On a white tab
 the tile itself disappears and only the A shows. `apple-touch-icon.png` is full-bleed
@@ -84,33 +82,32 @@ The tile is 0.9em and centred on Gabarito's 0.681em cap height (see `Wordmark.as
 resize it and the offset must be recomputed.
 
 **The wordmark is Gabarito 500, set in `Wordmark.astro`, not by its callers.** It was 600
-until 2026-09-30. 500 is also every heading's weight, so the sidebar lockup sits closer to
-the H1 and the solid mark weighs more against the letters; that was accepted. `og-image.png`
+until 2026-09-30. 500 is also every heading's weight. `og-image.png`
 bakes in the footer lockup: white on `#185de4`, Gabarito at 92px, centred in 1200×630. Change
 the weight or the mark and re-render the card.
 
 **The name carries no ™ anywhere** — not the lockup, the `<title>`, the meta tags, the
 social card or the docs.
 
-**Every heading goes through `SectionHeading.astro`.** The display face (Gabarito + `ss01`)
-carries the H1 *and* every heading below it — 20px against the H1's 28–32px and the 14px
-body. Don't hand-roll a size or reach for `font-body` on a heading; add the class to the
-component so the scale stays in one file. `as="h3"` is there for a heading nested inside
-another section — the level changes, the treatment does not. Nothing uses it today; the page
-is one H1 and three h2s.
+**Every section goes through `Section.astro`.** It holds the page's three columns and the
+one heading treatment: the display face (Gabarito + `ss01`), the H1's own, at 30–36px
+against the H1's 48–72px and the 18px body. Don't hand-roll a size or reach for `font-body`
+on a heading; change the component so the scale stays in one file. The page is one H1, in
+`Hero.astro`, and three h2s. The section is a grid of its own with a gutter either side, so
+its `wide` slot, the carousel's, runs through the right gutter to the edge of the screen.
 
 `font-ui` at 12px is now the *form label* style, not a heading style. It labels controls,
 which is a different job from titling a section.
 
-Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
-heading worded differently reads as the wrong destination. Change one, change the other.
-The `id`s are a separate contract with the scroll-spy and do not follow the copy (`starting`
-still points at the "Robots are changing" section).
+The section `id`s are anchors and do not follow the copy (`starting` is the "Robots are
+changing" section).
 
-**Anything that is real text must clear AA on the page, including qualifiers.** `nav`
-(`#808080`) is 3.59:1 on `page`, so it is only ever for the idle nav links, which darken to
-`ink` on hover and focus. The form's "(optional)" is set apart by weight rather than by
-dropping to `nav`, for exactly this reason.
+**Anything that is real text must clear AA on the page, including qualifiers.** A grey
+light enough to read as secondary does not: `#808080` is 3.59:1 on `page`. So all text is
+`ink`, and the form's "(optional)" is set apart by weight.
+
+**One filled button on the page: "Send".** The hero's "Get in touch" is a text link for
+that reason.
 
 **Naming IKEA, ABB, AstraZeneca or Universal Robots is a claim, so the wording is
 load-bearing.** The Applications copy says the team *has worked with* them — never "our customers",
@@ -124,26 +121,17 @@ back, the reasoning that took the longest to recover is in git: the marks were b
 own luminance — these four span 35–150 out of 255 — so a desaturated row reads as four
 different weights.
 
-## /v2-preview
+## The hero
 
 Daniel's brief (NOW-318, 2026-11-15): an Apple-like page that starts on the logo; scrolling
 zooms out and the logo reveals itself on the chest of the actual robot from the mod repo;
 simple; after Apple and moving.parts. Then: the carousel on to the right edge of the
-screen; live as a preview at `/v2-preview`; the head turns as the visitor scrolls and
-ends looking straight ahead (the first pass turned it down from there, and he asked for the
-other way); the camera's lenses reflective; the logo the same blue as the last panel, as a
-try; the head following the pointer, his pick from a list of ideas after moving.parts. How
-it works and what goes when it replaces `/` is in README.md, "/v2-preview".
+screen; the head turns as the visitor scrolls and ends looking straight ahead (the first
+pass turned it down from there, and he asked for the other way); the camera's lenses
+reflective; the logo the same blue as the last panel, as a try; the head following the
+pointer, his pick from a list of ideas after moving.parts. How it works is in README.md,
+"The hero".
 
-- **`/` must not change while the preview is up.** The two share `Carousel.astro`,
-  `ContactForm.astro`, `Footer.astro`, `Layout.astro` and `global.css`. After a change to
-  any of them, build `main` and the branch and compare full-page screenshots of `/`: when
-  the preview went in they were equal to the pixel at 1440 and 390 wide.
-- **One filled button on the page: "Send".** The hero's "Get in touch" is a text link for
-  that reason.
-- **Every section goes through `Section.astro`**, which holds the three columns and the
-  heading treatment. The section is a grid of its own with a gutter either side, so its
-  `wide` slot, the carousel's, runs through the right gutter to the edge of the screen.
 - **The zoom is drawn on a canvas, after three ways in the DOM failed** in Playwright's
   browsers. One transform around all five pictures: Chromium rounds each picture's box to
   whole pixels before the scale, and at a scale of 14 the tile's edge sat about 6px apart
@@ -157,9 +145,9 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
   `max(24.2vw, 22.7svh)` wide: the tile is 30mm, and the 124 × 132mm of plain chest cover
   around the mark has to fill the screen, else the shoulders show on the first screen. A
   new chest cover or a moved mark needs both numbers measured again, off `chest.webp`.
-- **The mark is the accent on `/v2-preview`**: on the first screen and on the robot's
-  chest. That is a second blue surface, against the rule above. Daniel asked for it as a
-  try; it stays or goes at sign-off.
+- **The mark's tile is the accent**: on the first screen and on the robot's chest. That
+  is a second blue surface, against the rule above. Daniel asked for it as a try
+  (2026-11-15) and took the page to `/` with it (2026-11-16).
 - **The cover's grey is read off the render**, beside the tile in `mark.webp`. Read it
   again after a new render. The cover's tile is `accent`, and `scripts/hero.sh` moves the
   rendered tile to the same value.
@@ -204,19 +192,21 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 - **A headless browser says nothing about the zoom's speed.** Playwright's Chromium and
   WebKit have no GPU here and take 100ms or more a frame.
 
-## State as of 2026-11-15
+## State as of 2026-11-16
 
-- `/v2-preview` is live for sign-off. It was checked in Playwright's Chromium and WebKit at
-  1440 × 900 and 390 × 844. It was not run in a real Safari, on a phone, or on a slow
-  machine.
-- NOW-318 was closed (Daniel, 2026-11-15), with the render script's side merged into
-  `open_arm-mods` main (its PR #24). `/v2-preview` still stands beside `/`: he has not asked
-  for it to replace `/`, and has not ruled on the blue mark. He came back on it the next
-  day for the robot's outline: stronger on the robot, then sharper along its edge. The
-  pictures here have that; the render script's changes are on a branch of `open_arm-mods`,
-  `agent/super-nerd/now-318-outline-edge`, not merged.
-- The large screen was checked in Playwright at 2560 × 1440 at 2x, Chromium and WebKit.
-  The sharper looks' first use was not timed: each is decoded when the head first needs it.
+- The page is `/` on ambotics.com since 2026-11-16, on Daniel's word (NOW-318: "Perfect
+  now. Merge it. Move it to the main domain as well"). It stood at `/v2-preview` for
+  sign-off from 2026-11-15, beside the first landing page: a sidebar with the wordmark and
+  a nav, 14px copy in one column. That page went, with `Sidebar.astro`,
+  `SectionHeading.astro` and the `muted` and `nav` tokens; `95f8578` is the last commit
+  with it. `/v2-preview` redirects to `/`.
+- The render script's side is in `open_arm-mods` main (its PRs #24 and #25).
+- Checked in Playwright's Chromium and WebKit at 1440 × 900, 2560 × 1440 at 2x and
+  390 × 844. Not run in a real Safari, on a phone, or on a slow machine.
+- Off the page the mark is still the footer's badge, a white tile with the A in the
+  accent: favicon, apple-touch-icon, `og-image.png`. The hero's mark is the reverse, an
+  accent tile. Daniel has not said whether they follow.
+- The sharper looks' first use was not timed: each is decoded when the head first needs it.
 - Daniel watched the head follow the pointer on the live page ("Nice!"). How far it turns
   for a pointer (`reach`) and how fast (80ms in `follow`) are as first set; he has asked for
   no change.
@@ -229,15 +219,10 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 ## Gotchas
 
 - **Tailwind reads comments and these docs too.** A bare word that is a utility's name
-  lands in the stylesheet, which `/` shares: the comparison of `/` against main then fails
-  on a class that nothing uses. It happened with the flex utility spelled like the verb
-  for getting larger, first in a comment in `Hero.astro`, then in this very note. Build
-  and compare after a change to a comment or a doc as well.
-- **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
-  `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
-  utility only because it scans the file and finds the bare string — rename the token or
-  the string and the active nav state silently stops working. Verify in the built CSS
-  (`grep text-ink dist/_astro/*.css`), not just by reading the source.
+  lands in the stylesheet as a class that nothing uses. It happened with the flex utility
+  spelled like the verb for getting larger, first in a comment in `Hero.astro`, then in
+  this very note. After a change to a comment or a doc, build `main` and the branch and
+  compare the stylesheets' class names.
 - **`public/CNAME` and `site` in `astro.config.mjs` must agree.** `CNAME` is what GitHub
   Pages reads; `site` builds the absolute canonical and OG URLs. To serve from
   `ambotics.github.io/landing-page` instead, delete `CNAME` and set `base: '/landing-page'`.
@@ -262,7 +247,7 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 
 There are no tests. For anything that changes rendering, build and screenshot before
 claiming it works — `astro check` and a green build do not catch a color that didn't apply
-or a utility Tailwind never generated. Screenshot `/v2-preview`'s hero in WebKit too, not
-only in Chromium: the two differ there (see "/v2-preview"). Reading computed styles out of a real browser
+or a utility Tailwind never generated. Screenshot the hero in WebKit too, not
+only in Chromium: the two differ there (see "The hero"). Reading computed styles out of a real browser
 (`getComputedStyle`) is the reliable check; diffing full-page screenshots against the
 previous build catches unintended layout shifts.
