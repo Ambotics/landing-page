@@ -11,7 +11,9 @@
 // pictures of its own through the same camera: looking down, then lifting to
 // where the five have it, level, and from there looking around, for the head
 // to turn after the visitor's pointer once the robot is at rest. All come from
-// the robot's own render script (see "The hero" in README.md).
+// the robot's own render script (see "The hero" in README.md). The whole robot
+// and the head's looks come twice, the second time twice as sharp: a large
+// screen shows the robot at rest larger than its first picture.
 //
 // CSS lays out the resting state: headline, then the whole robot. The script
 // only draws the zoom while the visitor scrolls through [data-travel], so
@@ -38,6 +40,11 @@ const sources = {
   ),
   // the head looking around: a picture for each row of looks, the highest first
   looks: zoom.look.ups.map((_, i) => picture(`look/${String(i).padStart(2, '0')}`).src),
+  // the whole robot and the looks, twice as sharp
+  sharper: {
+    robot: picture('robot_2x').src,
+    looks: zoom.look.ups.map((_, i) => picture(`look_2x/${String(i).padStart(2, '0')}`).src),
+  },
 };
 ---
 
@@ -449,6 +456,7 @@ const sources = {
       measure();
       p = scrolled();
       draw(p);
+      sharpen();
     });
     resting.observe(stage);
     resting.observe(view);
@@ -456,8 +464,13 @@ const sources = {
     // The pictures, each drawn as soon as it is in. The cover goes once the
     // closer ones are: the first screen is theirs. The head's frames come
     // after, and its looks last, once there is a pointer to look at.
-    const sources: { levels: string[]; head: string; frames: string[]; looks: string[] } =
-      JSON.parse(canvas.dataset.pictures!);
+    const sources: {
+      levels: string[];
+      head: string;
+      frames: string[];
+      looks: string[];
+      sharper: { robot: string; looks: string[] };
+    } = JSON.parse(canvas.dataset.pictures!);
     const load = (src: string) => {
       const picture = Object.assign(new Image(), { src });
       const loaded = picture.decode().then(
@@ -471,11 +484,38 @@ const sources = {
     const { picture: sharp, loaded: sharpLoaded } = load(sources.head);
     const heads = sources.frames.map(() => new Image());
     const looks = sources.looks.map(() => new Image());
+
+    // Whether the screen shows the robot at rest with a fifth more px than its
+    // picture has, or more: then the picture twice as sharp is wanted. Not
+    // before the stylesheet is in: until then the robot is as large as its
+    // picture, and Safari runs this that early.
+    const own = Number(robot.getAttribute('width')) / frame.w; // the picture's px per mm
+    const large = () =>
+      getComputedStyle(stage).position === 'sticky' && rest * devicePixelRatio > 1.2 * own;
+    // The sharper robot takes the first one's place, in the page and in the
+    // zoom, once the first screen is up. A window made larger can come to want
+    // it, so the observer above asks again.
+    let up = false;
+    let sharpened = false;
+    const sharpen = () => {
+      if (!up || sharpened || !large()) return;
+      sharpened = true;
+      const { picture, loaded } = load(sources.sharper.robot);
+      loaded.then(() => {
+        if (!picture.naturalWidth) return;
+        pictures[0] = picture;
+        robot.setAttribute('src', picture.src);
+        draw(p);
+      });
+    };
+
     const lift = Promise.all([
       ...levels.slice(1).map(({ loaded }) => loaded),
       sharpLoaded,
     ]).then(() => {
       cover.style.opacity = '0';
+      up = true;
+      sharpen();
       return Promise.all(
         sources.frames.map((src, i) =>
           Object.assign(heads[i], { src })
@@ -487,9 +527,22 @@ const sources = {
         )
       );
     });
+    // The sharper looks are large: ten of them decoded at once are 280 MB. So
+    // those are only fetched here, and each is decoded when the head first
+    // needs it.
+    const fetched = (picture: HTMLImageElement, src: string) =>
+      new Promise<void>((resolve, reject) => {
+        picture.onload = () => resolve();
+        picture.onerror = reject;
+        picture.src = src;
+      });
     Promise.all([lift, hasPointer])
       .then(() =>
-        Promise.all(sources.looks.map((src, i) => Object.assign(looks[i], { src }).decode()))
+        Promise.all(
+          large()
+            ? sources.sharper.looks.map((src, i) => fetched(looks[i], src))
+            : sources.looks.map((src, i) => Object.assign(looks[i], { src }).decode())
+        )
       )
       .then(
         () => {

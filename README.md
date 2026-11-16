@@ -204,6 +204,14 @@ on down the robot to its base. At rest the head turns after the visitor's pointe
   through one camera with a zoom lens. `zoom.json` gives each picture's place in mm on the
   mark's plane, from the mark's centre. Laid over each other they are one picture that is
   sharp at every zoom, from 1.5px per mm for the whole robot to 48 for the tile.
+- **The robot's outline is one width on the robot**, 0.35mm, in every picture, so it grows
+  with the zoom as the robot does. With one width in every picture it jumped to over twice
+  its width where the zoom passes from a picture to the next wider one.
+- **A large screen gets the robot twice as sharp.** At rest the robot is
+  `min(125vw, 78svh)` wide, so in a tall window it is larger than its 2400px picture and
+  comes out soft. Where the screen has a fifth more px than that picture, the page takes
+  `robot_2x.webp`, 4800px, in the page and in the zoom, and the head's looks from
+  `look_2x/`.
 - **The head is pictures of its own**, through the same camera: `head.webp` has it at
   home, looking 62 degrees down, and `head/00.webp` to `head/31.webp` lift it, 2 degrees a
   picture, to where the five pictures have it: level, looking at the visitor. The page
@@ -218,8 +226,9 @@ on down the robot to its base. At rest the head turns after the visitor's pointe
   It stops on a look. Over the last 5% of the zoom it turns part of the way, to the look
   nearest that. The neck's own limits are wider (pan 90, 30 up, 74 down), so every look is one the
   robot can take.
-- **876 kB for every visitor, 523 kB more for one with a mouse.** The five pictures are
-  419 kB and the head's lift is 457 kB. The lift's 32 are fetched once the first screen is
+- **905 kB for every visitor, 538 kB more for one with a mouse.** A large screen takes
+  325 kB for the sharper robot, and with a mouse 1.19 MB of sharper looks in place of the
+  538 kB. The five pictures are 425 kB and the head's lift is 481 kB. The lift's 32 are fetched once the first screen is
   up. The looks come after them, and only once a mouse moves or a wheel turns: a phone
   never fetches them.
 - **At rest it is plain CSS.** `Hero.astro` lays out the headline and the whole robot with
@@ -245,20 +254,21 @@ To render the pictures again, in a checkout of `open_arm-mods` with
 ```sh
 tools/outside.sh ../hero.log ~/Applications/Blender.app/Contents/MacOS/Blender -b --factory-startup \
     --python full_robot/shade.py -- full_robot/robot_325_posed.glb <out>/hero zoom \
-    --samples 512 --zoom-px 2400 --zoom-head 62 32 --zoom-look 40 20 25 5 --mark-blue \
-    --mark-svg <this repo>/src/assets/mark.svg
+    --samples 512 --zoom-px 2400 --zoom-head 62 32 --zoom-look 40 20 25 5 --zoom-2x \
+    --mark-blue --mark-svg <this repo>/src/assets/mark.svg
 ```
 
 62 is the neck's home tilt: that far up, the head is level, and that is where the five
-pictures have it. `--zoom-look` adds the 170 looks. One Blender would take over an hour for
-the 208 pictures: the five and the lift took 20 min, and a look is small and still takes
-20 s or more. `--zoom-only '^look_03_'` renders only the pictures whose name matches, here
-row 03 of the looks, so the work can go to several Blenders at once. Fifteen side by side
-took 21 min with the machine's load average near 25: one for the five pictures on six
-threads (`-t 6`), four for the lift on four each, ten for the looks on two each. With every
-Blender on all cores the load average went past 100. Then here,
+pictures have it. `--zoom-look` adds the 170 looks, and `--zoom-2x` the whole robot and the
+looks again, twice as sharp. That is 379 pictures, hours for one Blender: a look is small
+and still takes 20 s or more. `--zoom-only '^look_03_'` renders only the pictures whose
+name matches, here row 03 of the looks, so the work can go to several Blenders at once.
+Fifteen side by side took 21 min with the machine's load average near 25: one for the five
+pictures and the sharper robot on six threads (`-t 6`), four for the lift on four each, ten
+for the looks on two each. Ten more for the sharper looks, on three threads each, took
+17 min. With every Blender on all cores the load average went past 100. Then here,
 `scripts/hero.sh <out>/hero` moves the tile to the accent, fades each picture's edges,
-encodes it into `src/assets/hero/` and copies `zoom.json`: 3 min when it runs outside the agent's
+encodes it into `src/assets/hero/` and copies `zoom.json`: 6 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
 
 ### When it replaces /

@@ -187,6 +187,19 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
   (Daniel, 2026-11-15).
 - **The looks wait for a pointer**: a `pointermove` that is no touch, or a `wheel`, which
   says where the pointer is before it has moved.
+- **The outline is one width on the robot, not in the picture.** Every picture once had it
+  4px wide. Where the zoom passes from a picture to the next wider one, that one is drawn
+  up to 1.4 times its size and its line is 2.4 times as wide on the robot: Daniel saw the
+  outer outline suddenly wider and fuzzy (2026-11-16). Now it is 0.35mm on the robot in all
+  of them (`ZOOM_LINE` in `shade.py`), at 50% on the robot and 30% along its edge.
+- **A large screen shows the robot at rest larger than its picture.** The robot is
+  `min(125vw, 78svh)` wide: in Daniel's window, some 1470px high at 2x, 1.8 times the
+  2400px picture, and the head's looks with it. He saw the head fuzzy. Where the screen
+  has a fifth more px than the picture (`large()`), the script puts `robot_2x.webp` in the
+  picture's place, in the page and as the zoom's first picture, and fetches the looks from
+  `look_2x/`. It asks only once the stylesheet is in: before that the robot is as large as
+  its picture, and WebKit runs the script that early. The sharper looks are fetched but
+  not decoded ahead: ten of them decoded are 280 MB.
 - **The canvas is never over 16 million pixels.** iOS draws nothing on a larger one.
 - **A headless browser says nothing about the zoom's speed.** Playwright's Chromium and
   WebKit have no GPU here and take 100ms or more a frame.
@@ -199,9 +212,11 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 - NOW-318 was closed (Daniel, 2026-11-15), with the render script's side merged into
   `open_arm-mods` main (its PR #24). `/v2-preview` still stands beside `/`: he has not asked
   for it to replace `/`, and has not ruled on the blue mark. He came back on it the next
-  day for the robot's outline: stronger on the robot, as faint as before along its edge.
-  The pictures here have that; the render script's change is on a branch of
-  `open_arm-mods`, `agent/super-nerd/now-318-outline-edge`, not merged.
+  day for the robot's outline: stronger on the robot, then sharper along its edge. The
+  pictures here have that; the render script's changes are on a branch of `open_arm-mods`,
+  `agent/super-nerd/now-318-outline-edge`, not merged.
+- The large screen was checked in Playwright at 2560 × 1440 at 2x, Chromium and WebKit.
+  The sharper looks' first use was not timed: each is decoded when the head first needs it.
 - Daniel watched the head follow the pointer on the live page ("Nice!"). How far it turns
   for a pointer (`reach`) and how fast (80ms in `follow`) are as first set; he has asked for
   no change.
@@ -213,6 +228,11 @@ it works and what goes when it replaces `/` is in README.md, "/v2-preview".
 
 ## Gotchas
 
+- **Tailwind reads comments and these docs too.** A bare word that is a utility's name
+  lands in the stylesheet, which `/` shares: the comparison of `/` against main then fails
+  on a class that nothing uses. It happened with the flex utility spelled like the verb
+  for getting larger, first in a comment in `Hero.astro`, then in this very note. Build
+  and compare after a change to a comment or a doc as well.
 - **Scroll-spy uses a literal class string.** `src/components/Sidebar.astro` calls
   `classList.toggle('text-ink', …)` from its `<script>`. Tailwind v4 generates that
   utility only because it scans the file and finds the bare string — rename the token or
