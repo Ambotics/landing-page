@@ -1,11 +1,8 @@
 # Ambotics — landing page
 
-A recreation of [ambotics.framer.website](https://ambotics.framer.website),
-built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub Pages.
-
-The next page is live for sign-off at [`/v2-preview`](https://ambotics.com/v2-preview/):
-it opens on the mark and zooms out onto the robot. See **/v2-preview** below. Everything
-else in this file describes `/`.
+The page opens on the mark. Scrolling zooms out until the mark is the tile on the robot's
+chest. Built with [Astro](https://astro.build) + Tailwind CSS v4 and deployed to GitHub
+Pages.
 
 ## Develop
 
@@ -24,30 +21,27 @@ npm run dev        # http://localhost:4321
 ## Structure
 
 ```
-astro.config.mjs          # site URL + Tailwind Vite plugin
+astro.config.mjs          # site URL, the /v2-preview redirect, Tailwind Vite plugin
 public/
   CNAME                   # custom domain for GitHub Pages
   og-image.png            # social card: the lockup, white on the accent (needs an absolute URL)
   favicon.{svg,ico}, apple-touch-icon.png  # the mark: accent A on a white tile
-scripts/hero.sh           # /v2-preview: encodes the hero's pictures from the robot's renders
+scripts/hero.sh           # encodes the hero's pictures from the robot's renders
 src/
   assets/                 # carousel photos — optimised at build time by astro:assets
-    hero/                 # /v2-preview: the hero's pictures of the robot, and where each lies (zoom.json)
+    hero/                 # the hero's pictures of the robot, and where each lies (zoom.json)
     mark.svg              # the mark's drawing — read by Mark.astro and by the robot's render
   components/
     Carousel.astro        # scroll-snap carousel + arrow buttons (inside Applications)
     ContactForm.astro     # name / email / company / message, posted to Web3Forms
     Footer.astro          # accent-blue footer with grain overlay
-    Hero.astro            # /v2-preview: the mark, the zoom out to the robot, the H1
+    Hero.astro            # the mark, the zoom out to the robot, the H1
     Mark.astro            # the "A" knocked out of a currentColor tile — sits in the wordmark lockup
-    Section.astro         # /v2-preview: a section, heading in the first column, copy in the other two
-    SectionHeading.astro  # the one heading treatment — display face, 20px
-    Sidebar.astro         # logo, section nav, scroll-spy
-    Wordmark.astro        # mark + "Ambotics" lockup, shared by header and footer
+    Section.astro         # a section: heading in the first column, copy in the other two
+    Wordmark.astro        # mark + "Ambotics" lockup, in the footer
   data/applications.ts    # carousel entries (label + image)
   layouts/Layout.astro    # <head>, meta/OG tags, font loading
   pages/index.astro       # the page
-  pages/v2-preview.astro  # the next page, live for sign-off
   styles/global.css       # Tailwind import, @theme tokens, grain overlay
 .github/workflows/deploy.yml
 ```
@@ -66,13 +60,17 @@ That gives the accent a job, and the job comes with a rule: **the blue only ever
 something real.** It appears on the footer that closes the page, and on focus rings and
 text selection — places where it signals *this responds to you*. It is never decoration.
 
+One exception, and it is Daniel's: the mark's tile in the hero, on the first screen and on
+the robot's chest, is the accent. He asked for it as a try (NOW-318, 2026-11-15) and took
+the page live with it.
+
 The contact form's "Send" button is filled with `ink` rather than the accent. That is the
 grayscale-default rule applied to the most important control on the page: it earns
 attention through weight, not hue, and the blue stays on the plane behind it and the focus
 ring around it.
 
-Everything else stays in a plain grayscale — `#f4f4f4` page, `#2b2b2b` copy, gray nav —
-so the blue never has to compete for attention. When you add a component, the default is
+Everything else stays in a plain grayscale — `#f4f4f4` page, `#2b2b2b` copy — so the
+blue never has to compete for attention. When you add a component, the default is
 grayscale; reach for the accent only if the element genuinely does something.
 
 Two practical consequences:
@@ -96,37 +94,26 @@ rather than being deleted.
 
 ### One heading treatment
 
-Every heading renders through `SectionHeading.astro` in the display face — Gabarito with
-`ss01`, the H1's own treatment — so the page reads as one typographic voice and size alone
-establishes the hierarchy:
+Every heading is set in the display face — Gabarito with `ss01` — so the page reads as
+one typographic voice and size alone establishes the hierarchy. The H1 is in `Hero.astro`.
+Every section heading renders through `Section.astro`, which also holds the page's three
+columns, so headings and copy line up from one section to the next:
 
-| Level                       | Size                    | Face                    |
-| --------------------------- | ----------------------- | ----------------------- |
-| H1                          | `clamp(28px,5vw,32px)`  | Gabarito `ss01`, 500    |
-| Heading (`h2`, `h3`)        | 20px                    | Gabarito `ss01`, 500    |
-| Body                        | 14px                    | Inter, 460              |
-| Form label                  | 12px                    | Instrument Sans, 500    |
+| Level                | Size                                 | Face                 |
+| -------------------- | ------------------------------------ | -------------------- |
+| H1                   | 48px, 60px from `sm`, 72px from `lg` | Gabarito `ss01`, 500 |
+| Section heading (h2) | 30px, 36px from `sm`                 | Gabarito `ss01`, 500 |
+| Body                 | 18px on a 32px line                  | Inter, 460           |
+| Form label           | 12px                                 | Instrument Sans, 500 |
 
-20px was picked by measuring, not by ratio arithmetic. At 18px the heading reads as a
-bolded first line of the paragraph beneath it rather than as a heading; 20px separates
-cleanly and lands the h2/h1 ratio at 0.63, alongside the 0.65 of the reference page this
-layout follows.
+The page is one H1 and three h2s. The section `id`s are anchors and do not track the
+copy: `#starting` is the section headed "Robots are changing".
 
-`as="h3"` drops the level without changing the look, for a heading nested inside another
-section, so the outline can stay honest while the page keeps one heading treatment. Nothing
-uses it today — the page is one H1 and three h2s.
+### Real text is ink
 
-Nav labels in `Sidebar.astro` are the section headings verbatim — a link that lands on a
-heading with different wording reads as the wrong destination. The section `id`s are a
-separate contract with the scroll-spy and deliberately do not track the copy: `#starting`
-still points at the section now headed "Robots are changing".
-
-### `nav` is not for words
-
-`#808080` on the page background is 3.59:1 — under AA. It is fine for the idle sidebar
-links, which darken to `ink` on hover and focus. It is not fine for anything a visitor has
-to read, and that includes small qualifiers: the contact form's "(optional)" is separated
-from its label by weight, not by dropping to `nav`.
+Anything a visitor has to read is `ink`, small qualifiers included: the contact form's
+"(optional)" is separated from its label by weight, not by a lighter grey. A grey light
+enough to read as secondary does not clear AA on the page: `#808080` is 3.59:1.
 
 ### Naming companies is a claim
 
@@ -166,33 +153,13 @@ Edit these in the `@theme` block of `src/styles/global.css`; every utility follo
 | Token                  | Value     | Used for                                              |
 | ---------------------- | --------- | ----------------------------------------------------- |
 | `--color-page`         | `#f4f4f4` | Page background                                       |
-| `--color-ink`          | `#2b2b2b` | Headings, body copy, active/hover nav, CTA fill       |
+| `--color-ink`          | `#2b2b2b` | Headings, body copy, CTA fill                         |
 | `--color-ink-hover`    | `#3d3d3d` | CTA hover                                             |
-| `--color-accent`       | `#185de4` | Footer background, focus rings, selection             |
+| `--color-accent`       | `#185de4` | Footer, the hero's mark, focus rings, selection       |
 | `--color-accent-hover` | `#1450c4` | Reserved — no blue-filled control on the page today   |
-| `--color-muted`        | `#a8a8a8` | Wordmark                                              |
-| `--color-nav`          | `#808080` | Idle nav links                                        |
 | `--color-field`        | `#ededed` | Form field background                                 |
 
-Note the scroll-spy in `Sidebar.astro` toggles the literal class `text-ink` from
-JavaScript — Tailwind picks it up by scanning the file, so renaming the token means
-updating that string too.
-
-## /v2-preview
-
-The next landing page, live at `/v2-preview` for sign-off before it replaces `/`. No page
-links to it and it carries `noindex`. It has the copy, the carousel, the contact form and
-the footer of `/`. Its hero and its layout are its own: no sidebar, and three sections on
-one three-column grid, heading in the first column and copy in the other two. The carousel
-runs on to the right edge of the screen.
-
-| Level                | Size                                 | Face                 |
-| -------------------- | ------------------------------------ | -------------------- |
-| H1                   | 48px, 60px from `sm`, 72px from `lg` | Gabarito `ss01`, 500 |
-| Section heading (h2) | 30px, 36px from `sm`                 | Gabarito `ss01`, 500 |
-| Body                 | 18px on a 32px line                  | Inter, 460           |
-
-### The hero
+## The hero
 
 The page opens on the mark. Scrolling zooms out, and the mark turns out to be the tile on
 the robot's chest. The head comes into view looking down at the robot's hands, then lifts
@@ -271,14 +238,6 @@ for the looks on two each. Ten more for the sharper looks, on three threads each
 encodes it into `src/assets/hero/` and copies `zoom.json`: 6 min when it runs outside the agent's
 background band (`tools/outside.sh` again, with `/opt/homebrew/bin` on its `PATH`).
 
-### When it replaces /
-
-`index.astro` takes `v2-preview.astro`'s content and `v2-preview.astro` goes, with its
-`noindex`. `Sidebar.astro` and `SectionHeading.astro` go, and with them the `muted` and
-`nav` tokens and the default of `Carousel.astro`'s `track`. This file and `CLAUDE.md` then
-describe one page: commit `f409c79`, the first of the pull request that added
-`/v2-preview`, has both as they read for that page alone.
-
 ## How it's built
 
 - **Tailwind v4** via `@tailwindcss/vite`. The old inline `tailwind.config` object now lives
@@ -289,11 +248,14 @@ describe one page: commit `f409c79`, the first of the pull request that added
   `Instrument Sans` (UI labels) — plus `Satoshi` from Fontshare for the form.
 - **Images** go through `astro:assets`, which emits responsive WebP at 583w/1166w.
   This takes the carousel from ~3.4 MB of JPEG down to ~180 KB.
-- **Layout** — a left sidebar (logo + section nav) beside a content column on desktop;
-  a single column on mobile with the nav hidden.
-- **Scripts** — the carousel arrows, the nav scroll-spy, the contact form and
-  `/v2-preview`'s hero are plain `<script>` tags in their components; Astro bundles and
-  inlines them. No client-side framework.
+- **Layout** — the hero, then three sections on one three-column grid: heading in the
+  first column, copy in the other two. The carousel runs on to the right edge of the
+  screen. No sidebar and no nav.
+- **Scripts** — the carousel arrows, the contact form and the hero are plain `<script>`
+  tags in their components; Astro bundles and inlines them. No client-side framework.
+- **`/v2-preview` redirects to `/`** (`redirects` in `astro.config.mjs`). The page stood
+  there for sign-off before it replaced the first landing page, and links handed round
+  then still land on it. The redirect can go once nobody follows them.
 
 ## Deploying
 

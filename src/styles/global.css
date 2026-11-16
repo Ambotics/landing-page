@@ -18,8 +18,6 @@
   --color-accent: #185de4;
   --color-accent-hover: #1450c4;
 
-  --color-muted: #a8a8a8;
-  --color-nav: #808080;
   --color-field: #ededed;
 
   --font-display: 'Gabarito', sans-serif;
@@ -31,9 +29,9 @@
   --container-content: 600px;
 }
 
-/* /v2-preview's hero zooms out of the mark only where motion is welcome and
-   scripts run. Everywhere else that page is its resting state. Hero.astro's
-   script asks the browser the same question: change one, change the other. */
+/* The hero zooms out of the mark only where motion is welcome and scripts run.
+   Everywhere else the page is its resting state. Hero.astro's script asks the
+   browser the same question: change one, change the other. */
 @custom-variant zooming {
   @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
     @slot;
@@ -59,7 +57,7 @@ body {
   font-weight: 460;
 }
 
-/* The line under "Scroll" on /v2-preview's first screen draws itself downwards, again and again. */
+/* The line under "Scroll" on the first screen draws itself downwards, again and again. */
 .scroll-cue {
   transform-origin: top;
   animation: scroll-cue 2s ease-in-out infinite;
